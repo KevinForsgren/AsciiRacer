@@ -1,18 +1,33 @@
 #include <iostream>
+#include "header/terminal.h"
+#include <unistd.h>
+#include <chrono>
+#include <bits/this_thread_sleep.h>
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+// creating Clock alias by using
+using Clock = std::chrono::high_resolution_clock;
+static auto targetFrameTime = std::chrono::microseconds(16'666); // (1'000'000 / 60)
 
 int main()
 {
-    // TIP Press <shortcut actionId="RenameElement"/> when your caret is at the <b>lang</b> variable name to see how CLion can help you rename it.
 
-    const auto lang = "C++";
-    std::cout << "Hello and welcome to " << lang << "!\n";
-
-    for (int i = 1; i <= 5; i++)
+    while (true)
     {
-        std::cout << "i = " << i << std::endl;
+        auto startTime = Clock::now();
+
+
+
+
+
+
+        // checks for loop completion time and sleep if code executed before targeted time
+        if (auto frameTime = Clock::now() - startTime; frameTime < targetFrameTime)
+        {
+            std::this_thread::sleep_for(targetFrameTime - frameTime);
+        }
+
     }
 
     return 0;
 }
+
