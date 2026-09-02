@@ -16,6 +16,8 @@ class TerminalControl
         static std::string tc_color(int, int, int);
         static std::string tc_background(int, int, int);
         static void get_terminal_size(int* row, int* col);
+        static bool switch_raw_mode(bool);
+
 };
 
 

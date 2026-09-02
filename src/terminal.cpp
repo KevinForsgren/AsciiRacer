@@ -5,7 +5,7 @@
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_CLEAN
 #define VC_EXTRALEAN
-#include <Windows.h>
+#include <windows.h>
 #elif defined(__linux__)
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -60,6 +60,7 @@ void TerminalControl::get_terminal_size(int* row, int* col)
 
     #endif // windows/linux
 }
+
 
 /**
  * move cursor to the specific location in the terminal
@@ -118,3 +119,59 @@ void TerminalControl::show_cursor()
 {
     std::cout << "\033[?25h";
 }
+
+
+/**
+ * toggle between raw and cooked terminal mode
+ * @param toggle Bool
+ */
+bool TerminalControl::switch_raw_mode(const bool toggle)
+{
+#if defined (_WIN32)
+    static DWORD originalInputMode = 0;
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+
+    // Only fetch original attributes if haven't stored them yet
+    if (originalInputMode == 0 && !GetConsoleMode(hStdin, &originalInputMode)) {
+        return false;
+    }
+
+#elif defined (__linux__)
+    static termios oldT, newT;
+    if (tcgetattr(STDIN_FILENO, &oldT) != 0) return false;
+#endif
+
+    if (toggle)
+    {
+#if defined (_WIN32)
+        DWORD rawInputMode = originalInputMode;
+        rawInputMode &= ~ENABLE_LINE_INPUT;
+        rawInputMode &= ~ENABLE_ECHO_INPUT;
+        rawInputMode &= ~ENABLE_PROCESSED_INPUT;
+
+        if (!SetConsoleMode(hStdin, rawInputMode)) return false;
+
+#elif defined (__linux__)
+        newT = oldT;
+        // Bitwise not and AND operation to turn off the bits
+        newT.c_iflag &= ~(ICRNL | IXON);
+        // Turn off terminal ECHO, ICANON (canonical mode), IEXTEN, and ISIG (signals interruption)
+        newT.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+        // TCSANOW for reading one char at a time
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &newT) != 0) return false;
+#endif
+
+        return true;
+    }
+
+    // Restore original settings (toggle == false)
+#if defined(_WIN32)
+    if (!SetConsoleMode(hStdin, originalInputMode)) return false;
+#elif defined(__linux__)
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &oldT) != 0) return false;
+#endif
+
+    return true;
+}
+
