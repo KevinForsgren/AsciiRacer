@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 23)
 add_executable(AsciiRacer src/main.cpp
         src/terminal.cpp
         src/header/terminal.h
+        src/AsciiSprite.cpp
+        src/header/AsciiSprite.h
 )

@@ -14,9 +14,9 @@
 
 /**
  * return a ansi color code with the provided RGB values
- * @param R
- * @param G
- * @param B
+ * @param R red value
+ * @param G green value
+ * @param B blue value
  * @return
  */
 std::string TerminalControl::tc_color(int const R, int const G, int const B)
@@ -24,11 +24,12 @@ std::string TerminalControl::tc_color(int const R, int const G, int const B)
     return "\033[38;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
 }
 
+
 /**
  * return a ansi background color code with the provided RGB values
- * @param R
- * @param G
- * @param B
+ * @param R red value
+ * @param G green value
+ * @param B blue value
  * @return
  */
 std::string TerminalControl::tc_background(const int R, const int G, const int B)
@@ -36,34 +37,9 @@ std::string TerminalControl::tc_background(const int R, const int G, const int B
     return "\033[48;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
 }
 
-/**
- * Get the current size of the terminal
- * @param row update the row with the terminal current max row
- * @param col update the column with the terminal current max column
- * @return void
- */
-void TerminalControl::get_terminal_size(int* row, int* col)
-{
-    #if defined(_WIN32)
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-        *row = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
-        *col = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
-
-    #elif defined(__linux__)
-        winsize w{};
-
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-        *row = static_cast<int>(w.ws_row);
-        *col = static_cast<int>(w.ws_col);
-
-    #endif // windows/linux
-}
-
 
 /**
- * move cursor to the specific location in the terminal
+ * move cursor to the specific location in the terminal, starts from (1, 1)
  * @param X row
  * @param Y column
  * @return void
@@ -93,6 +69,7 @@ void TerminalControl::main_window()
     std::cout << "\033[?1049l";
 }
 
+
 /**
  * clear current content of the terminal
  * @return void
@@ -102,6 +79,7 @@ void TerminalControl::clear_terminal()
     std::cout << "\033[2J";
 }
 
+
 /**
  * hide the cursor
  * @return void
@@ -110,6 +88,7 @@ void TerminalControl::hide_cursor()
 {
     std::cout << "\033[?25l";
 }
+
 
 /**
  * show the cursor
@@ -122,8 +101,35 @@ void TerminalControl::show_cursor()
 
 
 /**
+ * Get the current size of the terminal
+ * @param row address of a variable
+ * @param col address of a variable
+ * @return void
+ */
+void TerminalControl::get_terminal_size(int* row, int* col)
+{
+#if defined(_WIN32)
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    *row = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
+    *col = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+
+#elif defined(__linux__)
+    winsize w{};
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    *row = static_cast<int>(w.ws_row);
+    *col = static_cast<int>(w.ws_col);
+
+#endif // windows/linux
+}
+
+
+/**
  * toggle between raw and cooked terminal mode
- * @param toggle Bool
+ * @param toggle Bool value for switching terminal mode
+ * @return bool
  */
 bool TerminalControl::switch_raw_mode(const bool toggle)
 {
@@ -149,6 +155,10 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         rawInputMode &= ~ENABLE_ECHO_INPUT;
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
 
+        // need to check this ||||
+        // timeout for reading input from terminal
+        rawInputMode = WaitForSingleObject(hStdin, 100);
+
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
 #elif defined (__linux__)
@@ -157,6 +167,10 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         newT.c_iflag &= ~(ICRNL | IXON);
         // Turn off terminal ECHO, ICANON (canonical mode), IEXTEN, and ISIG (signals interruption)
         newT.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+        // setting timeout for reading input
+        newT.c_cc[VMIN] &= 0;
+        newT.c_cc[VTIME] &= 1; //waiting for 1/10th of a second
 
         // TCSANOW for reading one char at a time
         if (tcsetattr(STDIN_FILENO, TCSANOW, &newT) != 0) return false;
@@ -175,3 +189,28 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
     return true;
 }
 
+/**
+ * Reads and store user input from the terminal
+ * @param c address pointer to store user input characters
+ * @return bool
+ */
+bool TerminalControl::read_input(char* c)
+{
+#if defined (__WIN32)
+    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD bytesRead;
+    if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
+    {
+        return true;
+    }
+
+#elif defined(__linux__)
+    // return true if i byte is read
+    if (read(STDIN_FILENO, c, 1) == 1)
+    {
+       return true;
+    }
+
+#endif
+    return false;
+}
