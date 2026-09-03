@@ -17,30 +17,6 @@ static std::vector<std::string> Game_Title = {
     R"(d88P     888  88888P'  "Y8888P 888 888 88888888 888   T88b "Y888888  "Y8888P "Y8888  888     )",
 };
 
-static std::vector<std::string> Game_Board_top_left = {
-    ".---",
-    "| .-",
-    "| | "
-};
-
-static std::vector<std::string> Game_Board_top_right = {
-    "---.",
-    "-. |",
-    " | |"
-};
-
-static std::vector<std::string> Game_Board_bottom_left = {
-    "| | ",
-    "| |_",
-    "|___ "
-};
-
-static std::vector<std::string> Game_Board_bottom_right = {
-    " | |",
-    "_| |",
-    "___|"
-};
-
 static std::vector<std::string> Game_Board = {
     ".----------------------------------------------------------------------------------------------------.",
     "| .------------------------------------------------------------------------------------------------. |",
@@ -91,10 +67,11 @@ void AsciiSprite::print_title(const int row, const int col)
 
 void AsciiSprite::print_game()
 {
-
+    std::cout << TerminalControl::move_cursor(0,0) << "Racing logic here" << std::endl;
 }
 
 void AsciiSprite::print_score()
 {
 
+    std::cout << TerminalControl::move_cursor(0,0) << "Score Board logic here" << std::endl;
 }
