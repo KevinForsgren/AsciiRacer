@@ -1,5 +1,6 @@
 #include "header/terminal.h"
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #if defined(_WIN32)
@@ -22,6 +23,7 @@
 std::string TerminalControl::tc_color(int const R, int const G, int const B)
 {
     return "\033[38;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
+
 }
 
 
@@ -42,11 +44,13 @@ std::string TerminalControl::tc_background(const int R, const int G, const int B
  * move cursor to the specific location in the terminal, starts from (1, 1)
  * @param X row
  * @param Y column
- * @return void
+ * @return ANSI code for a perticular location
  */
-void TerminalControl::move_cursor(const int X, const int Y)
+std::string TerminalControl::move_cursor(const int X, const int Y)
 {
-    std::cout << "\033[" << X << ';' << Y << 'H';
+    std::stringstream location;
+    location << "\033[" << X  << ';'  << Y << 'H';
+    return location.str();
 }
 
 

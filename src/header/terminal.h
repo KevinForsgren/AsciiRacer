@@ -11,7 +11,7 @@ class TerminalControl
         static void get_terminal_size(int* row, int* col);
         static void hide_cursor();
         static void main_window();
-        static void move_cursor(int, int);
+        static std::string move_cursor(int, int);
         static void new_window();
         static bool read_input(char* c);
         static void show_cursor();
