@@ -8,4 +8,8 @@ add_executable(AsciiRacer src/main.cpp
         src/header/terminal.h
         src/AsciiSprite.cpp
         src/header/AsciiSprite.h
+        src/header/AsciiArt.h
+        src/cars.cpp
+        src/header/cars.h
+        src/header/cars.h
 )

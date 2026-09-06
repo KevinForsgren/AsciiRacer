@@ -42,14 +42,14 @@ std::string TerminalControl::tc_background(const int R, const int G, const int B
 
 /**
  * move cursor to the specific location in the terminal, starts from (1, 1)
- * @param X row
- * @param Y column
- * @return ANSI code for a perticular location
+ * @param line row
+ * @param col column
+ * @return ANSI code for a particular location
  */
-std::string TerminalControl::move_cursor(const int X, const int Y)
+std::string TerminalControl::move_cursor(const int line, const int col)
 {
     std::stringstream location;
-    location << "\033[" << X  << ';'  << Y << 'H';
+    location << "\033[" << line  << ';'  << col << 'H';
     return location.str();
 }
 
@@ -176,7 +176,7 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         newT.c_cc[VMIN] &= 0;
         newT.c_cc[VTIME] &= 1; //waiting for 1/10th of a second
 
-        // TCSANOW for reading one char at a time
+        // TCSANOW for applying changes immediately
         if (tcsetattr(STDIN_FILENO, TCSANOW, &newT) != 0) return false;
 #endif
 

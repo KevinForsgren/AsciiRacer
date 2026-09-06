@@ -4,6 +4,7 @@
 #include <bits/this_thread_sleep.h>
 
 #include "header/AsciiSprite.h"
+#include "header/cars.h"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -25,75 +26,101 @@ namespace
         Racing,
         Score,
     };
+
+    struct Screen
+    {
+        int Row;
+        int Col;
+    };
 }
+
 
 int main()
 {
     Modes current_mode = Home;
-
-    int row;
-    int col;
-
     TerminalControl::new_window();
     TerminalControl::switch_raw_mode(true);
+
+    //Getting screen properties
+    Screen game_screen{};
+    TerminalControl::get_terminal_size(&game_screen.Row, &game_screen.Col);
+
+    // Initializing cars
+    Cars hero_car{};
+    hero_car.x_position = 10; // 10th col
+    hero_car.y_position = game_screen.Col - hero_car.height - 3;
 
     while (true)
     {
         // store current time
         auto startTime = Clock::now();
 
+        // creating clean terminal
         TerminalControl::clear_terminal();
         TerminalControl::hide_cursor();
 
-        TerminalControl::get_terminal_size(&row, &col);
 
         if (current_mode == Home)
         {
-            AsciiSprite::print_title(row, col);
+            // Home screen logic here
+            AsciiSprite::print_title(game_screen.Row, game_screen.Col);
 
-            char c;
-            // change game mode here
-            if (TerminalControl::read_input(&c))
+            char home_inpT;
+            if (TerminalControl::read_input(&home_inpT))
             {
-                if (c == 'r' || c == 'R')
+                if (home_inpT == 'r' || home_inpT == 'R')
                 {
                     current_mode = Racing;
                 }
-                else if (c == 's' || c == 'S')
+                else if (home_inpT == 's' || home_inpT == 'S')
                 {
                     current_mode = Score;
                 }
 
-                if (c == 'q' || c == 'Q') break;
+                if (home_inpT == 'q' || home_inpT == 'Q') break;
             }
         }
         else if (current_mode == Racing)
         {
-            AsciiSprite::print_game();
+            // Gaming screen logic here
 
-            char c;
-            // change game mode here
-            if (TerminalControl::read_input(&c))
+            char racing_inpT;
+
+            if (TerminalControl::read_input(&racing_inpT))
             {
-                if (c == 'h' || c == 'H')
+                switch (racing_inpT)
+                {
+                case 'a':
+                    hero_car.move_left(2);
+                    break;
+                case 'd':
+                    hero_car.move_right(2);
+                    break;
+                default: break;
+                }
+
+                if (racing_inpT == 'h' || racing_inpT == 'H')
                 {
                     current_mode = Home;
                 }
             }
+
+            AsciiSprite::print_game(&hero_car);
         }
         else if (current_mode == Score)
         {
-            AsciiSprite::print_score();
 
-            char c;
+            char score_inpT;
             // change game mode here
-            if (TerminalControl::read_input(&c))
+            if (TerminalControl::read_input(&score_inpT))
             {
-                if (c == 'h' || c == 'H')
+                if (score_inpT == 'h' || score_inpT == 'H')
                 {
                     current_mode = Home;
                 }
             }
+
+            AsciiSprite::print_score(score_inpT);
         }
 
 
@@ -106,6 +133,7 @@ int main()
 
     }
 
+    // turning terminal back to normal
     TerminalControl::switch_raw_mode(false);
     TerminalControl::main_window();
     TerminalControl::show_cursor();
