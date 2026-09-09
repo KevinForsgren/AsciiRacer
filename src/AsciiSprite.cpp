@@ -10,14 +10,24 @@
 #include "header/AsciiArt.h"
 #include "header/cars.h"
 
+static std::string print_race_car(const Cars* car);
+static int random_int(int min, int max);
 using TC = TerminalControl;
 
-static std::string print_container(const int* fuel);
+static std::vector<Car_Designs> car_designs = {
+    {.body = TC::tc_color(220, 40, 55), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(190, 190, 190)},
+    {.body = TC::tc_color(45, 105, 225), .bumper = TC::tc_color(235, 235, 235), .tyre = TC::tc_color(180, 180, 180)},
+    {.body = TC::tc_color(30, 175, 95), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(185, 185, 185)},
+    {.body = TC::tc_color(235, 115, 25), .bumper = TC::tc_color(250, 240, 220), .tyre = TC::tc_color(195, 195, 195)},
+    {.body = TC::tc_color(145, 65, 210), .bumper = TC::tc_color(240, 235, 250), .tyre = TC::tc_color(185, 185, 190)},
+    {.body = TC::tc_color(230, 185, 25), .bumper = TC::tc_color(255, 250, 220), .tyre = TC::tc_color(220, 220, 225)},
+};
+
 
 /**
  * Prints the game's menu screen
- * @param row
- * @param col
+ * @param row total no of terminal screen row
+ * @param col total no of terminal screen col
  */
 void AsciiSprite::print_title(const int row, const int col)
 {
@@ -62,21 +72,16 @@ void AsciiSprite::print_title(const int row, const int col)
 }
 
 
+/**
+ * Prints the main racing track, cars and other ui to the terminal
+ * @param main_car pointer to a class Car's object
+ */
 void AsciiSprite::print_game(const Cars* main_car)
 {
     std::stringstream frame_buffer;
 
-    frame_buffer << TC::move_cursor(1, 1) << "Racing logic here" << std::endl;
-
-    int a = 0;
-    for (const auto& str : car_model)
-    {
-        frame_buffer << TC::move_cursor(main_car->y_position + a, main_car->x_position);
-
-        frame_buffer << TC::tc_color(255, 0, 0) << str << TC::tc_color(255, 255, 255);
-        frame_buffer << std::endl;
-        a++;
-    }
+    // Drawing user car
+   frame_buffer << print_race_car(main_car);
 
     std::cout << frame_buffer.str() << std::flush;
 
@@ -86,43 +91,48 @@ void AsciiSprite::print_game(const Cars* main_car)
 //will improve
 void AsciiSprite::print_score(const char c)
 {
-    int fuel = 10;
-    std::random_device device;
-
-    std::mt19937 gen(device());
-    std::uniform_int_distribution<> distribution(1, 10);
-
-    if (distribution(gen) == 1)
-    {
-        fuel--;
-    }
-
-
-    std::cout << print_container(&fuel);
     std::cout << TerminalControl::move_cursor(0,0) << "You pressed: " << c << std::endl;
 }
 
-static std::string print_container(const int* fuel)
+
+/**
+ * Prints car on the racing track
+ * @param car pointer to an object of Class car
+ * @return
+ */
+static std::string print_race_car(const Cars* car)
 {
-    std::stringstream frame_buffer;
+    std::stringstream car_buffer;
 
-    frame_buffer << "[";
-    constexpr int capacity = 10;
-
-    //fill logic here
-    for (int i = 0; i < capacity; i++)
+    int a = 0;
+    for (const auto& str : car->car_model)
     {
-        if (i < *fuel)
-        {
-            frame_buffer << block_full;
-            // fuel--;
-            continue;
-        }
+        car_buffer << TC::move_cursor(car->y_position + a, car->x_position);
 
-        frame_buffer << non_block;
+        car_buffer << str;
+        car_buffer << std::endl;
+        a++;
     }
 
-    frame_buffer << "]";
+    car_buffer << TC::tc_color(255, 255, 255);
 
-    return frame_buffer.str();
+    return car_buffer.str();
+}
+
+
+/**
+ * Generates a random number from the given range
+ * @param min Range starts from
+ * @param max Range ends
+ * @return the random integer
+ */
+static int random_int(const int min, const int max)
+{
+    std::random_device device;
+
+    std::mt19937 gen(device());
+    std::uniform_int_distribution<> distribution(min, max);
+
+    return distribution(gen);
+
 }

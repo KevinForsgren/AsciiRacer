@@ -15,6 +15,7 @@
 
 // creating Clock alias by using
 using Clock = std::chrono::high_resolution_clock;
+using TC = TerminalControl;
 static auto targetFrameTime = std::chrono::microseconds(16'666); // (1'000'000 / 60)
 
 namespace
@@ -38,15 +39,15 @@ namespace
 int main()
 {
     Modes current_mode = Home;
-    TerminalControl::new_window();
-    TerminalControl::switch_raw_mode(true);
+    TC::new_window();
+    TC::switch_raw_mode(true);
 
     //Getting screen properties
     Screen game_screen{};
-    TerminalControl::get_terminal_size(&game_screen.Row, &game_screen.Col);
+    TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
     // Initializing cars
-    Cars hero_car{};
+    Cars hero_car{TC::tc_color(35,125,235), TC::tc_color(225,215,65), TC::tc_color(220,220,225)};
     hero_car.reset_car(game_screen.Row, game_screen.Col);
 
     while (true)
@@ -54,11 +55,11 @@ int main()
         // store current time
         auto startTime = Clock::now();
 
-        TerminalControl::get_terminal_size(&game_screen.Row, &game_screen.Col);
+        TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
         // creating clean terminal
-        TerminalControl::clear_terminal();
-        TerminalControl::hide_cursor();
+        TC::clear_terminal();
+        TC::hide_cursor();
 
         if (current_mode == Home)
         {
@@ -66,7 +67,7 @@ int main()
             AsciiSprite::print_title(game_screen.Row, game_screen.Col);
 
             char home_inpT;
-            if (TerminalControl::read_input(&home_inpT))
+            if (TC::read_input(&home_inpT))
             {
                 if (home_inpT == 'r' || home_inpT == 'R')
                 {
@@ -86,7 +87,7 @@ int main()
 
             char racing_inpT;
 
-            if (TerminalControl::read_input(&racing_inpT))
+            if (TC::read_input(&racing_inpT))
             {
                 switch (racing_inpT)
                 {
@@ -113,7 +114,7 @@ int main()
 
             char score_inpT;
             // change game mode here
-            if (TerminalControl::read_input(&score_inpT))
+            if (TC::read_input(&score_inpT))
             {
                 if (score_inpT == 'h' || score_inpT == 'H')
                 {
@@ -135,9 +136,9 @@ int main()
     }
 
     // turning terminal back to normal
-    TerminalControl::switch_raw_mode(false);
-    TerminalControl::main_window();
-    TerminalControl::show_cursor();
+    TC::switch_raw_mode(false);
+    TC::main_window();
+    TC::show_cursor();
 
     return 0;
 }

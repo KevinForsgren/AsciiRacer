@@ -12,18 +12,36 @@
 
 using TC = TerminalControl;
 
-Cars::Cars()
+/**
+ *
+ * @param base_color primary color for the race_car
+ * @param bumper_color color for car bumper
+ * @param tyre_color cars tyre color
+ */
+Cars::Cars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color)
 {
     tyre_health = 1000;
     fuel = 1000;
     chassis_health = 1000;
+
+    car_model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }
 
+
+/**
+ * Move car to the left
+ * @param steps number of steps to move in a direction
+ */
 void Cars::move_left(const int steps)
 {
     x_position -= steps;
 }
 
+
+/**
+ * Move car to the right
+ * @param steps number of steps to move in a direction
+ */
 void Cars::move_right(const int steps)
 {
     x_position += steps;
