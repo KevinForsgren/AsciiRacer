@@ -17,11 +17,12 @@ public:
     unsigned fuel;
     unsigned chassis_health;
     const int height = 7;
+    const int width = 10;
 
     Cars();
     void move_left(int steps);
     void move_right(int steps);
-    // std::vector<std::string> new_car();
+    void reset_car(int Row, int Col);
 
 };
 

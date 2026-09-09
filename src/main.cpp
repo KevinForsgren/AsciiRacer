@@ -47,18 +47,18 @@ int main()
 
     // Initializing cars
     Cars hero_car{};
-    hero_car.x_position = 10; // 10th col
-    hero_car.y_position = game_screen.Col - hero_car.height - 3;
+    hero_car.reset_car(game_screen.Row, game_screen.Col);
 
     while (true)
     {
         // store current time
         auto startTime = Clock::now();
 
+        TerminalControl::get_terminal_size(&game_screen.Row, &game_screen.Col);
+
         // creating clean terminal
         TerminalControl::clear_terminal();
         TerminalControl::hide_cursor();
-
 
         if (current_mode == Home)
         {
@@ -101,6 +101,7 @@ int main()
 
                 if (racing_inpT == 'h' || racing_inpT == 'H')
                 {
+                    hero_car.reset_car(game_screen.Row, game_screen.Col);
                     current_mode = Home;
                 }
             }

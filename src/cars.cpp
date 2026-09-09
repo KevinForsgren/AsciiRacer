@@ -29,17 +29,22 @@ void Cars::move_right(const int steps)
     x_position += steps;
 }
 
-// std::vector<std::string> Cars::new_car()
-// {
-//     std::vector<std::string> new_color;
-//
-//     int a = 0;
-//     for (const auto& str: car_model)
-//     {
-//        new_color << TC::tc_color(255, 200, 0) << str;
-//     }
-//
-//     return new_color;
-// }
+
+/**
+ * Reset the car to its initial state
+ * @param Row game screen total rows
+ * @param Col game screen total columns
+ */
+void Cars::reset_car(const int Row, const int Col)
+{
+    x_position = (Col - width) / 2;
+    y_position = Row - height - 1;
+
+    fuel = 1000;
+    chassis_health = 1000;
+    tyre_health = 1000;
+
+}
+
 
 
