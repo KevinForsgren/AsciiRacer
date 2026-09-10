@@ -20,7 +20,6 @@ static auto targetFrameTime = std::chrono::microseconds(16'666); // (1'000'000 /
 
 namespace
 {
-    //Game mode options
     enum Modes
     {
         Home,
@@ -84,7 +83,6 @@ int main()
         else if (current_mode == Racing)
         {
             // Gaming screen logic here
-
             char racing_inpT;
 
             if (TC::read_input(&racing_inpT))
@@ -107,7 +105,12 @@ int main()
                 }
             }
 
-            AsciiSprite::print_game(&hero_car);
+            if (AsciiSprite::print_game(&hero_car, game_screen.Row, game_screen.Col) > 0)
+            {
+                hero_car.reset_car(game_screen.Row, game_screen.Col);
+                current_mode = Home;
+            }
+
         }
         else if (current_mode == Score)
         {

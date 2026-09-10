@@ -13,6 +13,8 @@
 static std::string print_race_car(const Cars* car);
 static int random_int(int min, int max);
 using TC = TerminalControl;
+constexpr  int Lane_size = 11;
+constexpr int Track_size = 35;
 
 static std::vector<Car_Designs> car_designs = {
     {.body = TC::tc_color(220, 40, 55), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(190, 190, 190)},
@@ -75,16 +77,39 @@ void AsciiSprite::print_title(const int row, const int col)
 /**
  * Prints the main racing track, cars and other ui to the terminal
  * @param main_car pointer to a class Car's object
+ * @param screen_row
+ * @param screen_col
  */
-void AsciiSprite::print_game(const Cars* main_car)
+int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const int screen_col)
 {
     std::stringstream frame_buffer;
+
+    // Drawing track
+    // 33 gap mean track start from 1 and ends on 34
+    const int track_start = (screen_col - Track_size) / 2 ;
+    for (int i = 0; i < screen_row; i++)
+    {
+        frame_buffer << TC::move_cursor(i, track_start) << "┃";
+        const int first_lane = track_start + Lane_size;
+        frame_buffer << TC::move_cursor(i, first_lane) << "।";
+        const int middle_lane = first_lane + Lane_size + 1;
+        frame_buffer << TC::move_cursor(i, middle_lane) << "।" ;
+        const int last_lane = middle_lane + Lane_size + 1;
+        frame_buffer << TC::move_cursor(i, last_lane) << "┃";
+    }
 
     // Drawing user car
    frame_buffer << print_race_car(main_car);
 
+    // Detecting track collision
+    if (main_car->x_position <= track_start || (main_car->x_position + main_car->width) >= (track_start + Track_size))
+    {
+       return 1;
+    }
+
     std::cout << frame_buffer.str() << std::flush;
 
+    return 0;
 }
 
 

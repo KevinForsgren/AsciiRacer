@@ -5,12 +5,14 @@
 #include <vector>
 #include "cars.h"
 
+
+
 class AsciiSprite
 {
   // UI and screen
 public:
   static void print_title(int row, int col);
-  static void print_game(const Cars* main_car);
+  static int print_game(const Cars* main_car, int screen_row, int screen_col);
   static void print_score(char c);
 };
 

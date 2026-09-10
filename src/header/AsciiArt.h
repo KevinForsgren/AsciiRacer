@@ -53,13 +53,29 @@ constexpr std::string block_lower = "▄";
 constexpr std::string block_full = "▇";
 constexpr std::string non_block = "░";
 
+const std::vector<std::string> stone_dotted = {
+    "  ⡾⠛⢦⡀",
+    "⣾⢋⣀⣤⡴⣿",
+    "⠈⠛⠛⠛⠛⠋"
+};
+
+const std::vector<std::string> stone_dash = {
+    " .-..+-._ ",
+    "( ,'     )",
+    " '-___-_+'"
+};
+
+const std::vector<std::string> wooden_log = {
+    R"(_ __\ \_______,)",
+    "[_[_____>⌢<_____#"
+};
+
 class AsciiArt
 {
 public:
     static std::vector<std::string> change_car_color(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color)
     {
         std::vector<std::string> car_model(7);
-        // const std::string tyre_color = TC::tc_color(0, 0, 0);
 
         car_model[0] = base_color + "    _    ";
         car_model[1] = " " + tyre_color + "0" + base_color + "=[_]=" + tyre_color +"0" + base_color + " ";
