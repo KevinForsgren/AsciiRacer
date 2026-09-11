@@ -23,6 +23,7 @@ Cars::Cars(const std::string& base_color, const std::string& bumper_color, const
     tyre_health = 1000;
     fuel = 1000;
     chassis_health = 1000;
+    score = 0;
 
     car_model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }

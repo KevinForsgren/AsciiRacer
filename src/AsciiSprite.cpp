@@ -12,7 +12,10 @@
 
 static std::string print_race_car(const Cars* car);
 static int random_int(int min, int max);
+
+// Aliases
 using TC = TerminalControl;
+
 constexpr  int Lane_size = 11;
 constexpr int Track_size = 36;
 
@@ -55,14 +58,13 @@ void AsciiSprite::print_title(const int row, const int col)
         }
     }
 
-    // printing border
+    // printing options
     i += 5;
     for (const auto& str : game_menu)
     {
         frame_buffer << TC::move_cursor(i, (col - 20)/ 2) << str << std::endl;
         i++;
     }
-
     i += 2;
 
     const std::string message = "Press the appropriate highlighted key";
@@ -82,7 +84,9 @@ void AsciiSprite::print_pause_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
 
-    int i = (row - game_difficulty_rows - 6) / 2;
+    constexpr int pause_menu_height = game_difficulty_rows + 6;
+
+    int i = (row - pause_menu_height) / 2;
 
     const std::string message_1 = "Select Difficulty";
     frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message_1.length())) / 2) << message_1;
@@ -110,8 +114,9 @@ void AsciiSprite::print_pause_menu(const int row, const int col)
  * @param main_car pointer to a class Car's object
  * @param screen_row
  * @param screen_col
+ * @param game_over_message
  */
-int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const int screen_col)
+int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const int screen_col, std::string* game_over_message)
 {
     std::stringstream frame_buffer;
 
@@ -134,7 +139,9 @@ int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const in
     // Detecting track collision
     if (main_car->x_position <= track_start || (main_car->x_position + main_car->width) >= (track_start + Track_size))
     {
-       return 1;
+        *game_over_message = "Car Collide";
+        // needs to update car->score and also compare score with high score
+        return 1;
     }
 
     std::cout << frame_buffer.str() << std::flush;
@@ -143,18 +150,33 @@ int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const in
 }
 
 
-//will improve
-void AsciiSprite::print_score(const int high_score, const int score, int row, int col)
+
+void AsciiSprite::print_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
 
-    score_buffer << "HIGH SCORE";
-    score_buffer << high_score;
-    score_buffer << "YOUR SCORE";
-    score_buffer << score;
+    constexpr int score_page_height = 13;
 
-    std::string message = "Press [H] for Main Menu";
-    score_buffer << TC::move_cursor(i, (col - static_cast<int>(message_2.length())) / 2) << message_2 <<
+    int i = (row - score_page_height)/2;
+    if (!game_over_message.empty())
+    {
+        score_buffer << TC::move_cursor(i, (col - 9)/ 2) << "GAME OVER";
+        i += 2;
+        score_buffer << TC::move_cursor(i, (col - static_cast<int>(game_over_message.length())) / 2) << game_over_message;
+        i += 2;
+    } else
+    {
+        score_buffer << TC::move_cursor(i, (col - 11) / 2) << "SCORE BOARD";
+        i += 5;
+    }
+
+    score_buffer << TC::move_cursor(i, (col - 15) / 2) << "HIGH SCORE: " << high_score;
+    i += 2;
+    score_buffer << TC::move_cursor(i, (col - 15) / 2) << "YOUR SCORE: " << score;
+    i += 2;
+
+    const std::string message = "Press [H] for Main Menu";
+    score_buffer << TC::move_cursor(i, (col - static_cast<int>(message.length())) / 2) << message <<
          std::endl;
 
     std::cout << score_buffer.str() << std::flush;

@@ -20,7 +20,9 @@ public:
     int velocity{};
     int x_position{};
     int y_position{};
+    int high_score{};
     std::vector<std::string> car_model;
+    int score;
     unsigned tyre_health;
     unsigned fuel;
     unsigned chassis_health;

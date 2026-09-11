@@ -47,7 +47,6 @@ inline const std::vector<std::string> game_menu = {
 
 constexpr int game_difficulty_rows = 11;
 constexpr int game_difficulty_cols = 15;
-
 inline const std::vector<std::string> game_difficulty = {
     "╭─────────────╮",
     "│    \033[38;2;0;200;0mE\033[37masy     │",
