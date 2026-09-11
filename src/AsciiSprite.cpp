@@ -14,7 +14,7 @@ static std::string print_race_car(const Cars* car);
 static int random_int(int min, int max);
 using TC = TerminalControl;
 constexpr  int Lane_size = 11;
-constexpr int Track_size = 35;
+constexpr int Track_size = 36;
 
 static std::vector<Car_Designs> car_designs = {
     {.body = TC::tc_color(220, 40, 55), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(190, 190, 190)},
@@ -59,7 +59,7 @@ void AsciiSprite::print_title(const int row, const int col)
     i += 5;
     for (const auto& str : game_menu)
     {
-        frame_buffer << TC::move_cursor(i, (col - 102)/ 2) << str << std::endl;
+        frame_buffer << TC::move_cursor(i, (col - 20)/ 2) << str << std::endl;
         i++;
     }
 
@@ -68,6 +68,37 @@ void AsciiSprite::print_title(const int row, const int col)
     const std::string message = "Press the appropriate highlighted key";
 
     frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message.length())) / 2) << message <<
+        std::endl;
+
+    std::cout << frame_buffer.str() << std::flush;
+}
+
+
+/**
+ *
+ *
+ */
+void AsciiSprite::print_pause_menu(const int row, const int col)
+{
+    std::stringstream frame_buffer;
+
+    int i = (row - game_difficulty_rows - 6) / 2;
+
+    const std::string message_1 = "Select Difficulty";
+    frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message_1.length())) / 2) << message_1;
+    i += 2;
+
+    for (const auto& str: game_difficulty)
+    {
+        frame_buffer << TC::move_cursor(i, (col - game_difficulty_cols) /  2) << str;
+        i++;
+    }
+
+    i += 2;
+
+    const std::string message_2 = "Press the appropriate highlighted key";
+
+    frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message_2.length())) / 2) << message_2 <<
         std::endl;
 
     std::cout << frame_buffer.str() << std::flush;
@@ -85,12 +116,11 @@ int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const in
     std::stringstream frame_buffer;
 
     // Drawing track
-    // 33 gap mean track start from 1 and ends on 34
     const int track_start = (screen_col - Track_size) / 2 ;
     for (int i = 0; i < screen_row; i++)
     {
         frame_buffer << TC::move_cursor(i, track_start) << "┃";
-        const int first_lane = track_start + Lane_size;
+        const int first_lane = track_start + Lane_size + 1;
         frame_buffer << TC::move_cursor(i, first_lane) << "।";
         const int middle_lane = first_lane + Lane_size + 1;
         frame_buffer << TC::move_cursor(i, middle_lane) << "।" ;
@@ -114,9 +144,20 @@ int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const in
 
 
 //will improve
-void AsciiSprite::print_score(const char c)
+void AsciiSprite::print_score(const int high_score, const int score, int row, int col)
 {
-    std::cout << TerminalControl::move_cursor(0,0) << "You pressed: " << c << std::endl;
+    std::stringstream score_buffer;
+
+    score_buffer << "HIGH SCORE";
+    score_buffer << high_score;
+    score_buffer << "YOUR SCORE";
+    score_buffer << score;
+
+    std::string message = "Press [H] for Main Menu";
+    score_buffer << TC::move_cursor(i, (col - static_cast<int>(message_2.length())) / 2) << message_2 <<
+         std::endl;
+
+    std::cout << score_buffer.str() << std::flush;
 }
 
 

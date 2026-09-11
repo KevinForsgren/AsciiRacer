@@ -20,11 +20,19 @@ static auto targetFrameTime = std::chrono::microseconds(16'666); // (1'000'000 /
 
 namespace
 {
-    enum Modes
+    enum ScreenMode
     {
-        Home,
-        Racing,
-        Score,
+        MainMenu,
+        Gameplay,
+        ScoreBoard,
+        Pause,
+    };
+
+    enum DifficultyProfile
+    {
+        Easy,
+        Medium,
+        Hard,
     };
 
     struct Screen
@@ -32,18 +40,26 @@ namespace
         int Row;
         int Col;
     };
+
+    struct GameplaySettings
+    {
+        int steps;
+        int fuel_degradation;
+    };
 }
 
 
 int main()
 {
-    Modes current_mode = Home;
+    ScreenMode current_screen_mode = MainMenu;
     TC::new_window();
     TC::switch_raw_mode(true);
 
     //Getting screen properties
     Screen game_screen{};
     TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
+
+    GameplaySettings gameplay_settings{};
 
     // Initializing cars
     Cars hero_car{TC::tc_color(35,125,235), TC::tc_color(225,215,65), TC::tc_color(220,220,225)};
@@ -60,7 +76,7 @@ int main()
         TC::clear_terminal();
         TC::hide_cursor();
 
-        if (current_mode == Home)
+        if (current_screen_mode == MainMenu)
         {
             // Home screen logic here
             AsciiSprite::print_title(game_screen.Row, game_screen.Col);
@@ -70,17 +86,46 @@ int main()
             {
                 if (home_inpT == 'r' || home_inpT == 'R')
                 {
-                    current_mode = Racing;
+                    current_screen_mode = Pause;
                 }
                 else if (home_inpT == 's' || home_inpT == 'S')
                 {
-                    current_mode = Score;
+                    current_screen_mode = ScoreBoard;
                 }
 
                 if (home_inpT == 'q' || home_inpT == 'Q') break;
             }
         }
-        else if (current_mode == Racing)
+        else if (current_screen_mode == Pause)
+        {
+            // prints pause screen
+
+            char home_inpT;
+            if (TC::read_input(&home_inpT))
+            {
+                if (home_inpT == 'e' || home_inpT == 'E')
+                {
+                    gameplay_settings.steps = 12;
+                    gameplay_settings.fuel_degradation = 1;
+                    current_screen_mode = Gameplay;
+                }
+                else if (home_inpT == 'm' || home_inpT == 'M')
+                {
+                    gameplay_settings.steps = 2;
+                    gameplay_settings.fuel_degradation = 25;
+                    current_screen_mode = Gameplay;
+                }
+                else if (home_inpT == 'h' || home_inpT == 'H')
+                {
+                    gameplay_settings.steps = 1;
+                    gameplay_settings.fuel_degradation = 50;
+                    current_screen_mode = Gameplay;
+                }
+            }
+
+            AsciiSprite::print_pause_menu(game_screen.Row, game_screen.Col);
+        }
+        else if (current_screen_mode == Gameplay)
         {
             // Gaming screen logic here
             char racing_inpT;
@@ -90,10 +135,10 @@ int main()
                 switch (racing_inpT)
                 {
                 case 'a':
-                    hero_car.move_left(2);
+                    hero_car.move_left(gameplay_settings.steps);
                     break;
                 case 'd':
-                    hero_car.move_right(2);
+                    hero_car.move_right(gameplay_settings.steps);
                     break;
                 default: break;
                 }
@@ -101,27 +146,28 @@ int main()
                 if (racing_inpT == 'h' || racing_inpT == 'H')
                 {
                     hero_car.reset_car(game_screen.Row, game_screen.Col);
-                    current_mode = Home;
+                    current_screen_mode = MainMenu;
                 }
             }
 
             if (AsciiSprite::print_game(&hero_car, game_screen.Row, game_screen.Col) > 0)
             {
                 hero_car.reset_car(game_screen.Row, game_screen.Col);
-                current_mode = Home;
+                current_screen_mode = MainMenu;
             }
 
         }
-        else if (current_mode == Score)
+        else if (current_screen_mode == ScoreBoard)
         {
 
             char score_inpT;
+
             // change game mode here
             if (TC::read_input(&score_inpT))
             {
                 if (score_inpT == 'h' || score_inpT == 'H')
                 {
-                    current_mode = Home;
+                    current_screen_mode = MainMenu;
                 }
             }
 
@@ -145,4 +191,3 @@ int main()
 
     return 0;
 }
-
