@@ -10,7 +10,6 @@
 
 using TC = TerminalControl;
 
-constexpr int game_title_big_rows = 94;
 inline const std::vector<std::string> game_title_big = {
     "       d8888                   d8b d8b          8888888b.                                    ",
     "      d88888                   Y8P Y8P          888   Y88b                                   ",
@@ -21,8 +20,8 @@ inline const std::vector<std::string> game_title_big = {
     " d8888888888      X88 Y88b.    888 888          888  T88b  888  888 Y88b.   Y8b.     888     ",
     R"(d88P     888  88888P'  "Y8888P 888 888 88888888 888   T88b "Y888888  "Y8888P "Y8888  888     )",
 };
+constexpr int game_title_big_rows = 93;
 
-constexpr  int game_title_small_rows = 50;
 inline const std::vector<std::string> game_title_small = {
     "   _            _ _     __                       ",
     R"(  /_\  ___  ___(_|_)   /__\\ __ _  ___ ___ _ __  )",
@@ -30,6 +29,7 @@ inline const std::vector<std::string> game_title_small = {
     R"(/  _  \__ \ (__| | | / _  \ (_| | (_|  __/ |  )",
     R"(\_/ \_/___/\___|_|_| \/ \_/\__,_|\___\___|_|  )",
 };
+constexpr int game_title_small_rows = 49;
 
 inline const std::vector<std::string> game_menu = {
     "╭───────────────╮",
@@ -44,9 +44,8 @@ inline const std::vector<std::string> game_menu = {
     "│     \033[38;2;200;0;0mQ\033[37mUIT      │",
     "╰───────────────╯",
 };
+constexpr int game_menu_cols = 17;
 
-constexpr int game_difficulty_rows = 11;
-constexpr int game_difficulty_cols = 15;
 inline const std::vector<std::string> game_difficulty = {
     "╭─────────────╮",
     "│    \033[38;2;0;200;0mE\033[37masy     │",
@@ -60,6 +59,15 @@ inline const std::vector<std::string> game_difficulty = {
     "│    \033[38;2;200;0;0mH\033[37mard     │",
     "╰─────────────╯",
 };
+constexpr int game_difficulty_cols = 15;
+constexpr int game_difficulty_rows = 11;
+
+inline const std::vector<std::string> score_title = {
+    "╔══════════════╗",
+    "║  SCOREBOARD  ║",
+    "╚══════════════╝"
+};
+constexpr int score_title_cols = 16;
 
 constexpr std::string block_lower = "▄";
 constexpr std::string block_full = "▇";
@@ -100,6 +108,48 @@ public:
         return  car_model;
     }
 
+    static std::vector<std::string> race_light_dynamic(int seconds)
+    {
+        std::vector<std::string> race_light(5);
+
+        std::string color = TC::tc_color(255, 0, 0); // red
+
+        if (seconds < 2)
+        {
+            color = TC::tc_color(0, 255, 0); // green
+        }
+
+        race_light[0] = "══════════════╦═══════╦═══════╦══";
+        race_light[1] = "              ║       ║       ║  ";
+        if (seconds <= 1)
+        {
+            race_light[2] = color + "            [|||]   [|||]   [|||]";
+        }
+        else
+        {
+            race_light[2] = "            [   ]   [   ]   [   ]";
+        }
+
+        if (seconds <= 2)
+        {
+            race_light[3] = color + "            [|||]   [|||]   [|||]";
+        }
+        else
+        {
+            race_light[3] = "            [   ]   [   ]   [   ]";
+        }
+
+        if (seconds <= 3)
+        {
+            race_light[4] = color + "            [|||]   [|||]   [|||]" + TC::tc_color(255, 255, 255);
+        }
+        else
+        {
+            race_light[4] = "            [   ]   [   ]   [   ]";
+        }
+
+        return race_light;
+    }
 };
 
 #endif //ASCIIRACER_ASCIIART_H

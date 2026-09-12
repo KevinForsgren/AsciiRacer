@@ -84,7 +84,7 @@ int main()
         if (current_screen_mode == MainMenu)
         {
             // Home screen logic here
-            AsciiSprite::print_title(game_screen.Row, game_screen.Col);
+            AsciiSprite::print_main_menu(game_screen.Row, game_screen.Col);
 
             char home_inpT;
             if (TC::read_input(&home_inpT))
@@ -147,12 +147,6 @@ int main()
                     break;
                 default: break;
                 }
-
-                if (racing_inpT == 'h' || racing_inpT == 'H')
-                {
-                    hero_car.reset_car(game_screen.Row, game_screen.Col);
-                    current_screen_mode = MainMenu;
-                }
             }
 
             if (AsciiSprite::print_game(&hero_car, game_screen.Row, game_screen.Col, &Message) > 0)
@@ -202,7 +196,7 @@ int main()
 
 static bool handle_high_score(int* high_score, bool write_mode, const std::string& file_path)
 {
-
+    // Create a consistent file path for all systems
     fs::path targetPath(file_path);
 
     // 2. Ensure parent directories exist if a custom path is supplied (e.g., "saves/data.dat")

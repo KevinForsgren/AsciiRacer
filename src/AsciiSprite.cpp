@@ -11,6 +11,7 @@
 #include "header/cars.h"
 
 static std::string print_race_car(const Cars* car);
+static std::string print_race_light(const int second);
 static int random_int(int min, int max);
 
 // Aliases
@@ -34,7 +35,7 @@ static std::vector<Car_Designs> car_designs = {
  * @param row total no of terminal screen row
  * @param col total no of terminal screen col
  */
-void AsciiSprite::print_title(const int row, const int col)
+void AsciiSprite::print_main_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
     int i = 2;
@@ -62,7 +63,7 @@ void AsciiSprite::print_title(const int row, const int col)
     i += 5;
     for (const auto& str : game_menu)
     {
-        frame_buffer << TC::move_cursor(i, (col - 20)/ 2) << str << std::endl;
+        frame_buffer << TC::move_cursor(i, (col - game_menu_cols) / 2) << str << std::endl;
         i++;
     }
     i += 2;
@@ -120,6 +121,9 @@ int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const in
 {
     std::stringstream frame_buffer;
 
+    // Drawing track light
+    frame_buffer << print_race_light(1);
+
     // Drawing track
     const int track_start = (screen_col - Track_size) / 2 ;
     for (int i = 0; i < screen_row; i++)
@@ -166,8 +170,12 @@ void AsciiSprite::print_score(const int high_score, const int score, const int r
         i += 2;
     } else
     {
-        score_buffer << TC::move_cursor(i, (col - 11) / 2) << "SCORE BOARD";
-        i += 5;
+        for (const auto& str: score_title)
+        {
+            score_buffer << TC::move_cursor(i, (col - score_title_cols) / 2) << str;
+            i++;
+        }
+        i += 2;
     }
 
     score_buffer << TC::move_cursor(i, (col - 15) / 2) << "HIGH SCORE: " << high_score;
@@ -205,6 +213,25 @@ static std::string print_race_car(const Cars* car)
     car_buffer << TC::tc_color(255, 255, 255);
 
     return car_buffer.str();
+}
+
+
+static std::string print_race_light(const int second)
+{
+    std::stringstream frame_buffer;
+
+    const std::vector<std::string> race_light = AsciiArt::race_light_dynamic(second);
+
+    int i = 2;
+    for (const auto& str: race_light)
+    {
+        frame_buffer << TC::move_cursor(i, 2) << str;
+        i++;
+    }
+    i++;
+    frame_buffer << TC::move_cursor(i, 2) << "Race Starts in: " << second << "s";
+
+    return frame_buffer.str();
 }
 
 

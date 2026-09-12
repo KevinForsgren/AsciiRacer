@@ -1,12 +1,4 @@
-//
-// Created by kevin on 9/6/26.
-//
-
 #include "header/cars.h"
-
-#include <random>
-#include <sstream>
-
 #include "header/AsciiArt.h"
 #include "header/terminal.h"
 
