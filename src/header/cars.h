@@ -20,12 +20,12 @@ public:
     int velocity{};
     int x_position{};
     int y_position{};
-    int high_score{};
+    mutable int high_score{};
     std::vector<std::string> car_model;
     int score;
-    unsigned tyre_health;
-    unsigned fuel;
-    unsigned chassis_health;
+    int tyre_health;
+    int fuel;
+    int chassis_health;
     const int height = 7;
     const int width = 9;
 

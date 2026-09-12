@@ -1,4 +1,7 @@
 #include "header/cars.h"
+
+#include <random>
+
 #include "header/AsciiArt.h"
 #include "header/terminal.h"
 
@@ -48,7 +51,14 @@ void Cars::move_right(const int steps)
  */
 void Cars::reset_car(const int Row, const int Col)
 {
-    x_position = (Col - width) / 2;
+    int spawn_x[] = {21, 33, 45};
+    std::random_device device;
+
+    std::mt19937 gen(device());
+    std::uniform_int_distribution<> distribution(0, 2);
+
+    const int index = distribution(gen);
+    x_position = spawn_x[index];
     y_position = Row - height - 1;
 
     fuel = 1000;

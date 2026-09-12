@@ -11,14 +11,13 @@
 #include "header/cars.h"
 
 static std::string print_race_car(const Cars* car);
-static std::string print_race_light(const int second);
+static std::string print_race_light(int second);
 static int random_int(int min, int max);
 
 // Aliases
 using TC = TerminalControl;
 
-constexpr  int Lane_size = 11;
-constexpr int Track_size = 36;
+constexpr  int Lane_size = 12;
 
 static std::vector<Car_Designs> car_designs = {
     {.body = TC::tc_color(220, 40, 55), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(190, 190, 190)},
@@ -112,39 +111,52 @@ void AsciiSprite::print_pause_menu(const int row, const int col)
 
 /**
  * Prints the main racing track, cars and other ui to the terminal
- * @param main_car pointer to a class Car's object
+ * @param player_car pointer to a class Car's object
  * @param screen_row
  * @param screen_col
  * @param game_over_message
  */
-int AsciiSprite::print_game(const Cars* main_car, const int screen_row, const int screen_col, std::string* game_over_message)
+int AsciiSprite::print_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
 {
     std::stringstream frame_buffer;
 
-    // Drawing track light
-    frame_buffer << print_race_light(1);
-
     // Drawing track
-    const int track_start = (screen_col - Track_size) / 2 ;
+    constexpr int track_start = 2;
     for (int i = 0; i < screen_row; i++)
     {
-        frame_buffer << TC::move_cursor(i, track_start) << "┃";
-        const int first_lane = track_start + Lane_size + 1;
+        frame_buffer << TC::move_cursor(i, track_start) << "║║";
+        constexpr int left_side_ground = track_start + Lane_size + 5;
+        frame_buffer << TC::move_cursor(i, left_side_ground) << "┃";
+        constexpr int first_lane = left_side_ground + Lane_size;
         frame_buffer << TC::move_cursor(i, first_lane) << "।";
-        const int middle_lane = first_lane + Lane_size + 1;
+        constexpr int middle_lane = first_lane + Lane_size;
         frame_buffer << TC::move_cursor(i, middle_lane) << "।" ;
-        const int last_lane = middle_lane + Lane_size + 1;
+        constexpr int last_lane = middle_lane + Lane_size;
         frame_buffer << TC::move_cursor(i, last_lane) << "┃";
+        constexpr int right_side_ground = last_lane + Lane_size + 5;
+        frame_buffer << TC::move_cursor(i, right_side_ground) << "║║";
     }
+    constexpr int track_end = track_start + (5 * Lane_size) + 10;
 
-    // Drawing user car
-   frame_buffer << print_race_car(main_car);
+    // Drawing guides
+    std::string guide_message = "Press [A] for moving Left   Press [D] for moving Right   Avoid Grass and Collect fuel/tyre";
+    const int guide_col_starts = track_end+ (( screen_col - track_end - static_cast<int>(guide_message.length()) ) / 2 );
+
+    frame_buffer << TC::move_cursor(screen_row - 1, guide_col_starts) << guide_message;
+
+
+
+    // Drawing player car
+   frame_buffer << print_race_car(player_car);
 
     // Detecting track collision
-    if (main_car->x_position <= track_start || (main_car->x_position + main_car->width) >= (track_start + Track_size))
+    if (player_car->x_position <= (track_start + 1) || (player_car->x_position + player_car->width) >= (track_end))
     {
-        *game_over_message = "Car Collide";
-        // needs to update car->score and also compare score with high score
+        *game_over_message = "Car Collide to track";
+        if (player_car->score > player_car->high_score)
+        {
+            player_car->high_score = player_car->score;
+        }
         return 1;
     }
 
@@ -229,7 +241,11 @@ static std::string print_race_light(const int second)
         i++;
     }
     i++;
-    frame_buffer << TC::move_cursor(i, 2) << "Race Starts in: " << second << "s";
+
+    if (second > 0)
+    {
+        frame_buffer << TC::move_cursor(i, 2) << "Race Starts in: " << second << "s";
+    }
 
     return frame_buffer.str();
 }

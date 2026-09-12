@@ -69,6 +69,18 @@ inline const std::vector<std::string> score_title = {
 };
 constexpr int score_title_cols = 16;
 
+inline const std::vector<std::string> speedo_meter = {
+    "                                   ████",
+    "                               ████",
+    "                          ████",
+    "                     ████",
+    "                ████",
+    "           ████",
+    "       ████",
+    "   ████",
+    "██",
+};
+
 constexpr std::string block_lower = "▄";
 constexpr std::string block_full = "▇";
 constexpr std::string non_block = "░";
