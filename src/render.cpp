@@ -11,7 +11,7 @@
 #include "header/cars.h"
 
 static std::string print_race_car(const Cars* car);
-static std::string print_race_light(int second);
+static std::string print_infotainment_screen(int screen_col, int track_end, int second, int score, int high_score);
 static int random_int(int min, int max);
 
 // Aliases
@@ -138,13 +138,14 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
     }
     constexpr int track_end = track_start + (5 * Lane_size) + 10;
 
+    //Drawing Infotainment screen
+    frame_buffer << print_infotainment_screen(screen_col, track_end, 35, 350, 2909);
+
     // Drawing guides
-    std::string guide_message = "Press [A] for moving Left   Press [D] for moving Right   Avoid Grass and Collect fuel/tyre";
+    const std::string guide_message = "Press [A] for moving Left   Press [D] for moving Right   Avoid Grass and Collect fuel/tyre";
     const int guide_col_starts = track_end+ (( screen_col - track_end - static_cast<int>(guide_message.length()) ) / 2 );
 
     frame_buffer << TC::move_cursor(screen_row - 1, guide_col_starts) << guide_message;
-
-
 
     // Drawing player car
    frame_buffer << print_race_car(player_car);
@@ -228,26 +229,103 @@ static std::string print_race_car(const Cars* car)
 }
 
 
-static std::string print_race_light(const int second)
+static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, const int score, const int high_score)
 {
-    std::stringstream frame_buffer;
+    std::stringstream screen_buffer;
 
-    const std::vector<std::string> race_light = AsciiArt::race_light_dynamic(second);
+    constexpr int screen_start_row = 1;
 
-    int i = 2;
-    for (const auto& str: race_light)
+    // Right Side
+    const int screen_start_col = track_end + 12;
+    for (int i = 0; i < infotainment_screen_rows; i++)
     {
-        frame_buffer << TC::move_cursor(i, 2) << str;
-        i++;
-    }
-    i++;
+        // handling part with variable content size
+        if (i == 4)
+        {
+            screen_buffer << TC::move_cursor(screen_start_row + i,screen_start_col) << "│   " << second << "s";
 
-    if (second > 0)
+            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(second).length() + 6); j++)
+            {
+                screen_buffer << " ";
+            }
+
+            screen_buffer << "│";
+            continue;
+        }
+
+        if (i == 7 || i == 10)
+        {
+            int variable_digit;
+            if (i == 7)
+            {
+                variable_digit = score;
+            } else
+            {
+                variable_digit = high_score;
+            }
+
+            screen_buffer << TC::move_cursor(screen_start_row + i,screen_start_col) << "│   " << variable_digit;
+
+            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(variable_digit).length() + 5); j++)
+            {
+                screen_buffer << " ";
+            }
+
+            screen_buffer << "│";
+            continue;
+        }
+
+        screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << left_infotainment_screen[i];
+    }
+
+
+    // Right side
+    const int right_screen_start_col = screen_col - infotainment_screen_cols - 10;
+
+    for (int i = 0; i < infotainment_screen_rows; i++)
     {
-        frame_buffer << TC::move_cursor(i, 2) << "Race Starts in: " << second << "s";
+        // handling part with variable content size
+        if (i == 5)
+        {
+            screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   " << second << "s";
+
+            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(second).length() + 6); j++)
+            {
+                screen_buffer << " ";
+            }
+
+            screen_buffer << "│";
+            continue;
+        }
+
+        if (i == 7 || i == 9)
+        {
+            int variable_digit;
+            if (i == 7)
+            {
+                variable_digit = score;
+            } else
+            {
+                variable_digit = high_score;
+            }
+
+            screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   " << variable_digit;
+
+            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(variable_digit).length() + 5); j++)
+            {
+                screen_buffer << " ";
+            }
+
+            screen_buffer << "│";
+            continue;
+        }
+
+        screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << right_infotainment_screen[i];
     }
 
-    return frame_buffer.str();
+
+
+    return screen_buffer.str();
 }
 
 

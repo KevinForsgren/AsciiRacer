@@ -69,17 +69,39 @@ inline const std::vector<std::string> score_title = {
 };
 constexpr int score_title_cols = 16;
 
-inline const std::vector<std::string> speedo_meter = {
-    "                                   ████",
-    "                               ████",
-    "                          ████",
-    "                     ████",
-    "                ████",
-    "           ████",
-    "       ████",
-    "   ████",
-    "██",
+inline const std::vector<std::string> left_infotainment_screen = {
+    "     │                   │     ",
+    "╭─────────────────────────────╮",
+    "│                             │",
+    "│   Race Time                 │",
+    "",
+    "│                             │",
+    "│   Score                     │",
+    "",
+    "│                             │",
+    "│   High Score                │",
+    "",
+    "│                             │",
+    "╰─────────────────────────────╯"
 };
+
+inline const std::vector<std::string> right_infotainment_screen = {
+    "     │                   │     ",
+    "╭─────────────────────────────╮",
+    "│                             │",
+    "│  VEHICLE TELEMETRY          │",
+    "│                             │",
+    "",
+    "│                             │",
+    "",
+    "│                             │",
+    "",
+    "│                             │",
+    "│                             │",
+    "╰─────────────────────────────╯"
+};
+constexpr int infotainment_screen_rows = 13;
+constexpr int infotainment_screen_cols = 31;
 
 constexpr std::string block_lower = "▄";
 constexpr std::string block_full = "▇";
@@ -98,8 +120,8 @@ const std::vector<std::string> stone_dash = {
 };
 
 const std::vector<std::string> wooden_log = {
-    R"(_ __\ \_______,)",
-    "[_[_____>⌢<_____#"
+    R"(_ __\ \_____,)",
+    "[_[___>⌢<___#"
 };
 
 class AsciiArt
