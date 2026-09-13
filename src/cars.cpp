@@ -49,9 +49,20 @@ void Cars::move_right(const int steps)
  * @param Row game screen total rows
  * @param Col game screen total columns
  */
-void Cars::reset_car(const int Row, const int Col)
+void Cars::reset_car(const int Row, int Col)
 {
-    int spawn_x[] = {21, 33, 45};
+    // Adding one if total col is even cause car size is odd and calculating center will give float
+    // Adding one will no floor that float number
+    if (Col % 2 == 0)
+    {
+        Col++;
+    }
+
+    int spawn_x[3];
+    spawn_x[0] = (Col - width) / 2;
+    spawn_x[1] = spawn_x[0] + 12;
+    spawn_x[2] = spawn_x[0] - 12;
+
     std::random_device device;
 
     std::mt19937 gen(device());

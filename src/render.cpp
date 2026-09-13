@@ -11,7 +11,7 @@
 #include "header/cars.h"
 
 static std::string print_race_car(const Cars* car);
-static std::string print_infotainment_screen(int screen_col, int track_end, int second, int score, int high_score);
+static std::string print_infotainment_screen(int screen_col, int track_end, int second, const Cars* player_car);
 static std::string print_meter(int current_capacity, int max_capacity);
 static int random_int(int min, int max);
 
@@ -122,34 +122,27 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
     std::stringstream frame_buffer;
 
     // Drawing track
-    constexpr int track_start = 2;
-    for (int i = 0; i < screen_row; i++)
+    constexpr int track_size = (5 * Lane_size) + 10;
+    const int track_start = (screen_col - track_size) / 2;
+
+    for (int i = 0; i <= screen_row; i++)
     {
         frame_buffer << TC::move_cursor(i, track_start) << "║║";
-        constexpr int left_side_ground = track_start + Lane_size + 5;
+        const int left_side_ground = track_start + Lane_size + 5;
         frame_buffer << TC::move_cursor(i, left_side_ground) << "┃";
-        constexpr int first_lane = left_side_ground + Lane_size;
+        const int first_lane = left_side_ground + Lane_size;
         frame_buffer << TC::move_cursor(i, first_lane) << "।";
-        constexpr int middle_lane = first_lane + Lane_size;
+        const int middle_lane = first_lane + Lane_size;
         frame_buffer << TC::move_cursor(i, middle_lane) << "।" ;
-        constexpr int last_lane = middle_lane + Lane_size;
+        const int last_lane = middle_lane + Lane_size;
         frame_buffer << TC::move_cursor(i, last_lane) << "┃";
-        constexpr int right_side_ground = last_lane + Lane_size + 5;
+        const int right_side_ground = last_lane + Lane_size + 5;
         frame_buffer << TC::move_cursor(i, right_side_ground) << "║║";
     }
-    constexpr int track_end = track_start + (5 * Lane_size) + 10;
-
-    //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(screen_col, track_end, 35, 350, 2909);
-
-    // Drawing guides
-    const std::string guide_message = "Press [A] for moving Left   Press [D] for moving Right   Avoid Grass and Collect fuel/tyre";
-    const int guide_col_starts = track_end+ (( screen_col - track_end - static_cast<int>(guide_message.length()) ) / 2 );
-
-    frame_buffer << TC::move_cursor(screen_row - 1, guide_col_starts) << guide_message;
+    const int track_end = track_start + (5 * Lane_size) + 10;
 
     // Drawing player car
-   frame_buffer << print_race_car(player_car);
+    frame_buffer << print_race_car(player_car);
 
     // Detecting track collision
     if (player_car->x_position <= (track_start + 1) || (player_car->x_position + player_car->width) >= (track_end))
@@ -161,6 +154,20 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
         }
         return 1;
     }
+
+    // Drawing guides
+    const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
+    const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
+
+    frame_buffer << TC::move_cursor(screen_row - 1, ( screen_col - (screen_col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    frame_buffer << TC::move_cursor(screen_row - 1, track_end + (screen_col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
+
+    /**
+    //Drawing Infotainment screen
+    frame_buffer << print_infotainment_screen(screen_col, track_end, 35, player_car);
+
+
+    **/
 
     std::cout << frame_buffer.str() << std::flush;
 
@@ -230,7 +237,7 @@ static std::string print_race_car(const Cars* car)
 }
 
 
-static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, Cars* player_car)
+static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, const Cars* player_car)
 {
     std::stringstream screen_buffer;
 
