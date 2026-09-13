@@ -1,5 +1,5 @@
 
-#include "header/AsciiSprite.h"
+#include "header/render.h"
 
 #include <iostream>
 #include <random>
@@ -34,7 +34,7 @@ static std::vector<Car_Designs> car_designs = {
  * @param row total no of terminal screen row
  * @param col total no of terminal screen col
  */
-void AsciiSprite::print_main_menu(const int row, const int col)
+void render::print_main_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
     int i = 2;
@@ -80,7 +80,7 @@ void AsciiSprite::print_main_menu(const int row, const int col)
  *
  *
  */
-void AsciiSprite::print_pause_menu(const int row, const int col)
+void render::print_pause_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
 
@@ -116,7 +116,7 @@ void AsciiSprite::print_pause_menu(const int row, const int col)
  * @param screen_col
  * @param game_over_message
  */
-int AsciiSprite::print_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
+int render::print_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
 {
     std::stringstream frame_buffer;
 
@@ -167,7 +167,7 @@ int AsciiSprite::print_game(const Cars* player_car, const int screen_row, const 
 
 
 
-void AsciiSprite::print_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
+void render::print_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
 

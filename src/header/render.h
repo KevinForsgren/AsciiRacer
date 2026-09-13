@@ -7,7 +7,7 @@
 
 
 
-class AsciiSprite
+class render
 {
   // UI and screen
 public:
