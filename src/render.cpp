@@ -12,6 +12,7 @@
 
 static std::string print_race_car(const Cars* car);
 static std::string print_infotainment_screen(int screen_col, int track_end, int second, int score, int high_score);
+static std::string print_meter(int current_capacity, int max_capacity);
 static int random_int(int min, int max);
 
 // Aliases
@@ -168,7 +169,7 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
 
 
 
-void render::print_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
+void render::render_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
 
@@ -229,7 +230,7 @@ static std::string print_race_car(const Cars* car)
 }
 
 
-static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, const int score, const int high_score)
+static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, Cars* player_car)
 {
     std::stringstream screen_buffer;
 
@@ -258,10 +259,10 @@ static std::string print_infotainment_screen(const int screen_col, const int tra
             int variable_digit;
             if (i == 7)
             {
-                variable_digit = score;
+                variable_digit = player_car->score;
             } else
             {
-                variable_digit = high_score;
+                variable_digit = player_car->high_score;
             }
 
             screen_buffer << TC::move_cursor(screen_start_row + i,screen_start_col) << "│   " << variable_digit;
@@ -285,49 +286,66 @@ static std::string print_infotainment_screen(const int screen_col, const int tra
     for (int i = 0; i < infotainment_screen_rows; i++)
     {
         // handling part with variable content size
-        if (i == 5)
+        if (i == 5 || i == 7 || i == 9)
         {
-            screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   " << second << "s";
+            int current_capacity;
 
-            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(second).length() + 6); j++)
+            if (i == 5)
             {
-                screen_buffer << " ";
+                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Chassis   ";
+                screen_buffer << print_meter(player_car->chassis_health, 1000);
+            }
+            else if (i == 7)
+            {
+                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Tyre      ";
+                screen_buffer << print_meter(player_car->tyre_health, 1000);
+            }
+            else
+            {
+                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Fuel      ";
+                screen_buffer << print_meter(player_car->fuel, 1000);
             }
 
-            screen_buffer << "│";
+
+            screen_buffer << "    │";
             continue;
         }
 
-        if (i == 7 || i == 9)
-        {
-            int variable_digit;
-            if (i == 7)
-            {
-                variable_digit = score;
-            } else
-            {
-                variable_digit = high_score;
-            }
 
-            screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   " << variable_digit;
-
-            for (int j = 0; j < infotainment_screen_cols - ( std::to_string(variable_digit).length() + 5); j++)
-            {
-                screen_buffer << " ";
-            }
-
-            screen_buffer << "│";
-            continue;
-        }
 
         screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << right_infotainment_screen[i];
     }
 
 
-
     return screen_buffer.str();
 }
 
+
+static std::string print_meter(const int current_capacity, const int max_capacity)
+{
+    std::stringstream meter_buffer;
+
+    meter_buffer << "[";
+
+    const float filled_part_percentage = std::round(( static_cast<float>(current_capacity) / max_capacity ) * 10);
+
+    const int filled_part = static_cast<int>(filled_part_percentage);
+
+    for (int i = 0; i < filled_part; i++)
+    {
+        meter_buffer << block_full;
+    }
+
+    const int empty_part = 10 - filled_part;
+    for (int i = 0; i < empty_part; i++)
+    {
+        meter_buffer << non_block_full;
+    }
+
+    meter_buffer << "]";
+
+    return meter_buffer.str();
+}
 
 /**
  * Generates a random number from the given range

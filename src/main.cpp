@@ -147,7 +147,7 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::print_score(player_car.high_score, player_car.score, game_screen.Row, game_screen.Col, Message);
+            render::render_score(player_car.high_score, player_car.score, game_screen.Row, game_screen.Col, Message);
 
 
             char score_inpT;

@@ -98,14 +98,16 @@ inline const std::vector<std::string> right_infotainment_screen = {
     "",
     "│                             │",
     "│                             │",
-    "╰─────────────────────────────╯"
+    "╰─────────────────────────────╯",
+    "│  Chassis    [█████░████]    │"
+
 };
 constexpr int infotainment_screen_rows = 13;
 constexpr int infotainment_screen_cols = 31;
 
+constexpr std::string block_full = "█";
+constexpr std::string non_block_full = "░";
 constexpr std::string block_lower = "▄";
-constexpr std::string block_full = "▇";
-constexpr std::string non_block = "░";
 
 const std::vector<std::string> stone_dotted = {
     "  ⡾⠛⢦⡀",
