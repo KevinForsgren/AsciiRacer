@@ -19,11 +19,11 @@
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
 // Handling Clock
-using Clock = std::chrono::high_resolution_clock;
 static auto targetFrameTime = std::chrono::microseconds(16'666); // (1'000'000 / 60)
 
 using TC = TerminalControl;
 static std::string Message;
+static int PlayerScore;
 
 // Handling Files
 namespace fs = std::filesystem;
@@ -48,6 +48,7 @@ int main()
     player_car.reset_car(game_screen.Row, game_screen.Col);
     handle_high_score(&player_car.high_score, false, FilePath);
 
+    // need to implement game tick and time here but increment their value only when inside render game
     GameState game_state{};
     game_state.gameTick = 0; // 60 ticks per second on average
 
@@ -63,7 +64,8 @@ int main()
         game_state.gameTime += deltaTime;
         previousTime = startTime;
 
-        TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
+        // Uncomment for getting terminal size every iteration
+        //// TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
         // creating clean terminal
         TC::clear_terminal();
@@ -91,8 +93,12 @@ int main()
         }
         else if (current_screen_mode == Pause)
         {
-            // Manage Pause Screen
+            // Manage PauseScreen
+
             render::render_pause_menu(game_screen.Row, game_screen.Col);
+
+            // Reset GameTick to 0 for every new gameplay
+            game_state.gameTick = 0;
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -100,19 +106,25 @@ int main()
                 if (pause_inpT == 'e' || pause_inpT == 'E')
                 {
                     gameplay_settings.steps = 12;
-                    gameplay_settings.fuel_degradation = 1;
+                    gameplay_settings.fuel_degradation = 10;
+                    gameplay_settings.tyre_degradation = 7;
+                    gameplay_settings.chassis_degradation = 0;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'm' || pause_inpT == 'M')
                 {
                     gameplay_settings.steps = 2;
-                    gameplay_settings.fuel_degradation = 25;
+                    gameplay_settings.fuel_degradation = 13;
+                    gameplay_settings.tyre_degradation = 10;
+                    gameplay_settings.chassis_degradation = 0;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'h' || pause_inpT == 'H')
                 {
                     gameplay_settings.steps = 1;
-                    gameplay_settings.fuel_degradation = 50;
+                    gameplay_settings.fuel_degradation = 20;
+                    gameplay_settings.tyre_degradation = 13;
+                    gameplay_settings.chassis_degradation = 0;
                     current_screen_mode = Gameplay;
                 }
             }
@@ -121,6 +133,7 @@ int main()
         else if (current_screen_mode == Gameplay)
         {
             // Gaming screen logic here
+
             char gameplay_inpT;
 
             if (TC::read_input(&gameplay_inpT))
@@ -137,8 +150,9 @@ int main()
                 }
             }
 
-            if (render::render_game(&player_car, game_screen.Row, game_screen.Col, &Message) > 0)
+            if (render::render_game(&player_car, &game_screen, &Message, &game_state, &gameplay_settings) > 0)
             {
+                PlayerScore = player_car.score;
                 player_car.reset_car(game_screen.Row, game_screen.Col);
                 current_screen_mode = ScoreBoard;
             }
@@ -147,7 +161,7 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::render_score(player_car.high_score, player_car.score, game_screen.Row, game_screen.Col, Message);
+            render::render_score(player_car.high_score, PlayerScore, game_screen.Row, game_screen.Col, Message);
 
 
             char score_inpT;
@@ -163,8 +177,6 @@ int main()
 
         }
 
-
-        game_state.gameTick++;
 
         // checks for loop completion time and sleep if code executed before targeted time
         if (auto frameTime = Clock::now() - startTime; frameTime < targetFrameTime)

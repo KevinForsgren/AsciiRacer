@@ -1,6 +1,7 @@
 
 #include "header/render.h"
 
+#include <chrono>
 #include <iostream>
 #include <random>
 #include <sstream>
@@ -9,6 +10,7 @@
 #include "header/terminal.h"
 #include "header/AsciiArt.h"
 #include "header/cars.h"
+#include "header/gameSettings.h"
 
 static std::string print_race_car(const Cars* car);
 static std::string print_infotainment_screen(int screen_row, int screen_col, int track_end, int second, const Cars* player_car);
@@ -113,19 +115,20 @@ void render::render_pause_menu(const int row, const int col)
 /**
  * Prints the main racing track, cars and other ui to the terminal
  * @param player_car pointer to a class Car's object
- * @param screen_row
- * @param screen_col
- * @param game_over_message
+ * @param game_screen pointer to game screen properties
+ * @param game_over_message pointer to game over message
+ * @param game_state
+ * @param gameplay_settings
  */
-int render::render_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
+int render::render_game(Cars* player_car, const Screen* game_screen, std::string* game_over_message, GameState* game_state, const GameplaySettings* gameplay_settings)
 {
     std::stringstream frame_buffer;
 
     // Drawing track
     constexpr int track_size = (5 * Lane_size) + 10;
-    const int track_start = (screen_col - track_size) / 2;
+    const int track_start = (game_screen->Col - track_size) / 2;
 
-    for (int i = 0; i <= screen_row; i++)
+    for (int i = 0; i <= game_screen->Row; i++)
     {
         frame_buffer << TC::move_cursor(i, track_start) << "║║";
         const int left_side_ground = track_start + Lane_size + 5;
@@ -142,20 +145,20 @@ int render::render_game(const Cars* player_car, const int screen_row, const int 
     const int track_end = track_start + (5 * Lane_size) + 10;
 
 
-    // Drawing guides
+    // Printing player guides
     const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
     const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
 
-    frame_buffer << TC::move_cursor(screen_row - 1, ( screen_col - (screen_col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
-    frame_buffer << TC::move_cursor(screen_row - 1, track_end + (screen_col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
+    frame_buffer << TC::move_cursor(game_screen->Row - 1, ( game_screen->Col - (game_screen->Col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    frame_buffer << TC::move_cursor(game_screen->Row - 1, track_end + (game_screen->Col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(screen_row, screen_col, track_end, 35, player_car);
+    frame_buffer << print_infotainment_screen(game_screen->Row, game_screen->Col, track_end, static_cast<int>(game_state->gameTime), player_car);
 
     // Drawing player car
     frame_buffer << print_race_car(player_car);
 
-    // Detecting track collision
+    // Detecting track collision and car status
     if (player_car->x_position <= (track_start + 1) || (player_car->x_position + player_car->width) >= (track_end))
     {
         *game_over_message = "Car Collide to track";
@@ -166,8 +169,43 @@ int render::render_game(const Cars* player_car, const int screen_row, const int 
         return 1;
     }
 
+    if (player_car->tyre_health <= 0 || player_car->fuel <= 0 || player_car->chassis_health <= 0)
+    {
+        if (player_car->tyre_health <= 0)
+        {
+            *game_over_message = "Tyre Punctured";
+        }
+        else if (player_car->chassis_health == 0)
+        {
+            *game_over_message = "Car Chassis Destroyed";
+        }
+        else
+        {
+            *game_over_message = "Empty Fuel Tank";
+        }
+
+        if (player_car->score > player_car->high_score)
+        {
+            player_car->high_score = player_car->score;
+        }
+        return 1;
+    }
+
+    // Decrement player car fuel and tyre health
+    if (static_cast<int>(game_state->gameTime) % 60 == 0)
+    {
+        player_car->tyre_health -=  1;
+        player_car->fuel -= gameplay_settings->fuel_degradation;
+
+    }
+
+    // Increment player score
+    // need to implement reward collecting score increment
+    player_car->score = static_cast<int>(game_state->gameTick * 0.25);
 
     std::cout << frame_buffer.str() << std::flush;
+
+    game_state->gameTick++;
 
     return 0;
 }

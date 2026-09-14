@@ -5,6 +5,9 @@
 #ifndef ASCIIRACER_GAMESETTINGS_H
 #define ASCIIRACER_GAMESETTINGS_H
 #include <cstdint>
+#include <chrono>
+
+using Clock = std::chrono::high_resolution_clock;
 
 enum ScreenMode
 {

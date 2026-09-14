@@ -75,6 +75,7 @@ void Cars::reset_car(const int Row, int Col)
     fuel = 1000;
     chassis_health = 1000;
     tyre_health = 1000;
+    score = 0;
 
 }
 
