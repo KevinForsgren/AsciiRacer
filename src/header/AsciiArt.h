@@ -69,9 +69,10 @@ inline const std::vector<std::string> score_title = {
 };
 constexpr int score_title_cols = 16;
 
-inline const std::vector<std::string> left_infotainment_screen = {
-    "     │                   │     ",
+inline const std::vector<std::string> lower_infotainment_screen = {
     "╭─────────────────────────────╮",
+    "│                             │",
+    "│        RACE TELEMETRY       │",
     "│                             │",
     "│   Race Time                 │",
     "",
@@ -84,12 +85,12 @@ inline const std::vector<std::string> left_infotainment_screen = {
     "│                             │",
     "╰─────────────────────────────╯"
 };
+constexpr int lower_infotainment_screen_rows = 14;
 
-inline const std::vector<std::string> right_infotainment_screen = {
-    "     │                   │     ",
+inline const std::vector<std::string> upper_infotainment_screen = {
     "╭─────────────────────────────╮",
     "│                             │",
-    "│  VEHICLE TELEMETRY          │",
+    "│        VEHICLE STATUS       │",
     "│                             │",
     "",
     "│                             │",
@@ -99,10 +100,8 @@ inline const std::vector<std::string> right_infotainment_screen = {
     "│                             │",
     "│                             │",
     "╰─────────────────────────────╯",
-    "│  Chassis    [█████░████]    │"
-
 };
-constexpr int infotainment_screen_rows = 13;
+constexpr int upper_infotainment_screen_rows = 12;
 constexpr int infotainment_screen_cols = 31;
 
 constexpr std::string block_full = "█";

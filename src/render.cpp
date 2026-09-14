@@ -11,7 +11,7 @@
 #include "header/cars.h"
 
 static std::string print_race_car(const Cars* car);
-static std::string print_infotainment_screen(int screen_col, int track_end, int second, const Cars* player_car);
+static std::string print_infotainment_screen(int screen_row, int screen_col, int track_end, int second, const Cars* player_car);
 static std::string print_meter(int current_capacity, int max_capacity);
 static int random_int(int min, int max);
 
@@ -35,7 +35,7 @@ static std::vector<Car_Designs> car_designs = {
  * @param row total no of terminal screen row
  * @param col total no of terminal screen col
  */
-void render::print_main_menu(const int row, const int col)
+void render::render_main_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
     int i = 2;
@@ -81,7 +81,7 @@ void render::print_main_menu(const int row, const int col)
  *
  *
  */
-void render::print_pause_menu(const int row, const int col)
+void render::render_pause_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
 
@@ -117,7 +117,7 @@ void render::print_pause_menu(const int row, const int col)
  * @param screen_col
  * @param game_over_message
  */
-int render::print_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
+int render::render_game(const Cars* player_car, const int screen_row, const int screen_col, std::string* game_over_message)
 {
     std::stringstream frame_buffer;
 
@@ -141,6 +141,17 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
     }
     const int track_end = track_start + (5 * Lane_size) + 10;
 
+
+    // Drawing guides
+    const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
+    const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
+
+    frame_buffer << TC::move_cursor(screen_row - 1, ( screen_col - (screen_col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    frame_buffer << TC::move_cursor(screen_row - 1, track_end + (screen_col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
+
+    //Drawing Infotainment screen
+    frame_buffer << print_infotainment_screen(screen_row, screen_col, track_end, 35, player_car);
+
     // Drawing player car
     frame_buffer << print_race_car(player_car);
 
@@ -155,19 +166,6 @@ int render::print_game(const Cars* player_car, const int screen_row, const int s
         return 1;
     }
 
-    // Drawing guides
-    const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
-    const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
-
-    frame_buffer << TC::move_cursor(screen_row - 1, ( screen_col - (screen_col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
-    frame_buffer << TC::move_cursor(screen_row - 1, track_end + (screen_col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
-
-    /**
-    //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(screen_col, track_end, 35, player_car);
-
-
-    **/
 
     std::cout << frame_buffer.str() << std::flush;
 
@@ -237,18 +235,59 @@ static std::string print_race_car(const Cars* car)
 }
 
 
-static std::string print_infotainment_screen(const int screen_col, const int track_end, const int second, const Cars* player_car)
+static std::string print_infotainment_screen(const int screen_row, const int screen_col, const int track_end, const int second, const Cars* player_car)
 {
     std::stringstream screen_buffer;
 
-    constexpr int screen_start_row = 1;
+    int screen_start_row = ( screen_row - ( upper_infotainment_screen_rows + lower_infotainment_screen_rows + 3 ) - 2) / 2;
 
-    // Right Side
-    const int screen_start_col = track_end + 12;
-    for (int i = 0; i < infotainment_screen_rows; i++)
+    const std::string heading = "CAR CONTROL";
+    screen_buffer << TC::move_cursor(screen_start_row - 3, track_end + (screen_col - track_end - static_cast<int>(heading.length())) / 2) << heading;
+
+    const int screen_start_col = track_end + (( screen_col - track_end - infotainment_screen_cols) / 2);
+
+    // Upper Half
+    for (int i = 0; i < upper_infotainment_screen_rows; i++)
     {
         // handling part with variable content size
-        if (i == 4)
+        if (i == 4 || i == 6 || i == 8)
+        {
+            int current_capacity;
+
+            if (i == 4)
+            {
+                screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Chassis   ";
+                screen_buffer << print_meter(player_car->chassis_health, 1000);
+            }
+            else if (i == 6)
+            {
+                screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Tyre      ";
+                screen_buffer << print_meter(player_car->tyre_health, 1000);
+            }
+            else
+            {
+                screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Fuel      ";
+                screen_buffer << print_meter(player_car->fuel, 1000);
+            }
+
+
+            screen_buffer << "    │";
+            continue;
+        }
+
+
+
+        screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << upper_infotainment_screen[i];
+    }
+
+
+    // Lower half
+    screen_start_row += upper_infotainment_screen_rows + 3;
+
+    for (int i = 0; i < lower_infotainment_screen_rows; i++)
+    {
+        // handling part with variable content size
+        if (i == 5)
         {
             screen_buffer << TC::move_cursor(screen_start_row + i,screen_start_col) << "│   " << second << "s";
 
@@ -261,10 +300,10 @@ static std::string print_infotainment_screen(const int screen_col, const int tra
             continue;
         }
 
-        if (i == 7 || i == 10)
+        if (i == 8 || i == 11)
         {
             int variable_digit;
-            if (i == 7)
+            if (i == 8)
             {
                 variable_digit = player_car->score;
             } else
@@ -283,44 +322,7 @@ static std::string print_infotainment_screen(const int screen_col, const int tra
             continue;
         }
 
-        screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << left_infotainment_screen[i];
-    }
-
-
-    // Right side
-    const int right_screen_start_col = screen_col - infotainment_screen_cols - 10;
-
-    for (int i = 0; i < infotainment_screen_rows; i++)
-    {
-        // handling part with variable content size
-        if (i == 5 || i == 7 || i == 9)
-        {
-            int current_capacity;
-
-            if (i == 5)
-            {
-                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Chassis   ";
-                screen_buffer << print_meter(player_car->chassis_health, 1000);
-            }
-            else if (i == 7)
-            {
-                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Tyre      ";
-                screen_buffer << print_meter(player_car->tyre_health, 1000);
-            }
-            else
-            {
-                screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << "│   Fuel      ";
-                screen_buffer << print_meter(player_car->fuel, 1000);
-            }
-
-
-            screen_buffer << "    │";
-            continue;
-        }
-
-
-
-        screen_buffer << TC::move_cursor(screen_start_row + i, right_screen_start_col) << right_infotainment_screen[i];
+        screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << lower_infotainment_screen[i];
     }
 
 

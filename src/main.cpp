@@ -72,7 +72,7 @@ int main()
         if (current_screen_mode == MainMenu)
         {
             // Managing Game's main menu
-            render::print_main_menu(game_screen.Row, game_screen.Col);
+            render::render_main_menu(game_screen.Row, game_screen.Col);
 
             char home_inpT;
             if (TC::read_input(&home_inpT))
@@ -92,7 +92,7 @@ int main()
         else if (current_screen_mode == Pause)
         {
             // Manage Pause Screen
-            render::print_pause_menu(game_screen.Row, game_screen.Col);
+            render::render_pause_menu(game_screen.Row, game_screen.Col);
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -137,7 +137,7 @@ int main()
                 }
             }
 
-            if (render::print_game(&player_car, game_screen.Row, game_screen.Col, &Message) > 0)
+            if (render::render_game(&player_car, game_screen.Row, game_screen.Col, &Message) > 0)
             {
                 player_car.reset_car(game_screen.Row, game_screen.Col);
                 current_screen_mode = ScoreBoard;
