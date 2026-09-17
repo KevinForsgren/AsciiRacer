@@ -25,8 +25,8 @@ struct Screen
 
 struct GameState
 {
-    uint64_t gameTick;
-    double gameTime;
+    uint64_t gameTick = 0;
+    double gameTime = 0;
 };
 
 struct GameplaySettings

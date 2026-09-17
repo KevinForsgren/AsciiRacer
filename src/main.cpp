@@ -9,12 +9,12 @@
 #include "header/cars.h"
 #include "header/gameSettings.h"
 
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__linux__)
-#include <unistd.h>
-#include <termios.h>
-#endif
+// #if defined(_WIN32)
+// #include <windows.h>
+// #elif defined(__linux__)
+// #include <unistd.h>
+// #include <termios.h>
+// #endif
 
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
@@ -48,12 +48,9 @@ int main()
     player_car.reset_car(game_screen.Row, game_screen.Col);
     handle_high_score(&player_car.high_score, false, FilePath);
 
-    // need to implement game tick and time here but increment their value only when inside render game
-    GameState game_state{};
-    game_state.gameTick = 0; // 60 ticks per second on average
 
-    //Starting games Clock
-    game_state.gameTime = 0;
+    // Initialize inGames time and tick
+    GameState game_state{};
     auto previousTime = Clock::now();
 
     while (true)
@@ -67,7 +64,7 @@ int main()
         // Uncomment for getting terminal size every iteration
         //// TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
-        // creating clean terminal
+        // Creating a clean terminal
         TC::clear_terminal();
         TC::hide_cursor();
 
@@ -95,10 +92,11 @@ int main()
         {
             // Manage PauseScreen
 
-            render::render_pause_menu(game_screen.Row, game_screen.Col);
-
-            // Reset GameTick to 0 for every new gameplay
+            // Reset gameTick and gameTime to 0 for every new gameplay
             game_state.gameTick = 0;
+            game_state.gameTime = 0;
+
+            render::render_pause_menu(game_screen);
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -106,7 +104,7 @@ int main()
                 if (pause_inpT == 'e' || pause_inpT == 'E')
                 {
                     gameplay_settings.steps = 12;
-                    gameplay_settings.fuel_degradation = 10;
+                    gameplay_settings.fuel_degradation = 11;
                     gameplay_settings.tyre_degradation = 7;
                     gameplay_settings.chassis_degradation = 0;
                     current_screen_mode = Gameplay;
@@ -114,7 +112,7 @@ int main()
                 else if (pause_inpT == 'm' || pause_inpT == 'M')
                 {
                     gameplay_settings.steps = 2;
-                    gameplay_settings.fuel_degradation = 13;
+                    gameplay_settings.fuel_degradation = 15;
                     gameplay_settings.tyre_degradation = 10;
                     gameplay_settings.chassis_degradation = 0;
                     current_screen_mode = Gameplay;
@@ -150,7 +148,7 @@ int main()
                 }
             }
 
-            if (render::render_game(&player_car, &game_screen, &Message, &game_state, &gameplay_settings) > 0)
+            if (render::render_game(&player_car, game_screen, &Message, &game_state, gameplay_settings) > 0)
             {
                 PlayerScore = player_car.score;
                 player_car.reset_car(game_screen.Row, game_screen.Col);
@@ -161,7 +159,7 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::render_score(player_car.high_score, PlayerScore, game_screen.Row, game_screen.Col, Message);
+            render::render_score(player_car.high_score, PlayerScore, game_screen, Message);
 
 
             char score_inpT;
@@ -195,6 +193,9 @@ int main()
 
     return 0;
 }
+
+// TODO:- fix gameTime => currently gameTime starts when the player loads the script and keeps increasing but i want to only start gameTime when inside gameplay block
+// FIXME:- gameTime
 
 static bool handle_high_score(int* high_score, bool write_mode, const std::string& file_path)
 {

@@ -1,16 +1,14 @@
-
-#include "header/render.h"
-
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <sstream>
 #include <string>
 
-#include "header/terminal.h"
 #include "header/AsciiArt.h"
 #include "header/cars.h"
 #include "header/gameSettings.h"
+#include "header/render.h"
+#include "header/terminal.h"
 
 static std::string print_race_car(const Cars* car);
 static std::string print_infotainment_screen(int screen_row, int screen_col, int track_end, int second, const Cars* player_car);
@@ -83,21 +81,21 @@ void render::render_main_menu(const int row, const int col)
  *
  *
  */
-void render::render_pause_menu(const int row, const int col)
+void render::render_pause_menu(const Screen game_screen)
 {
     std::stringstream frame_buffer;
 
     constexpr int pause_menu_height = game_difficulty_rows + 6;
 
-    int i = (row - pause_menu_height) / 2;
+    int i = (game_screen.Row - pause_menu_height) / 2;
 
     const std::string message_1 = "Select Difficulty";
-    frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message_1.length())) / 2) << message_1;
+    frame_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(message_1.length())) / 2) << message_1;
     i += 2;
 
     for (const auto& str: game_difficulty)
     {
-        frame_buffer << TC::move_cursor(i, (col - game_difficulty_cols) /  2) << str;
+        frame_buffer << TC::move_cursor(i, (game_screen.Col - game_difficulty_cols) /  2) << str;
         i++;
     }
 
@@ -105,7 +103,7 @@ void render::render_pause_menu(const int row, const int col)
 
     const std::string message_2 = "Press the appropriate highlighted key";
 
-    frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message_2.length())) / 2) << message_2 <<
+    frame_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(message_2.length())) / 2) << message_2 <<
         std::endl;
 
     std::cout << frame_buffer.str() << std::flush;
@@ -120,15 +118,17 @@ void render::render_pause_menu(const int row, const int col)
  * @param game_state
  * @param gameplay_settings
  */
-int render::render_game(Cars* player_car, const Screen* game_screen, std::string* game_over_message, GameState* game_state, const GameplaySettings* gameplay_settings)
+int render::render_game(Cars* player_car, const Screen game_screen, std::string* game_over_message, GameState* game_state, const GameplaySettings gameplay_settings)
 {
+
+
     std::stringstream frame_buffer;
 
     // Drawing track
     constexpr int track_size = (5 * Lane_size) + 10;
-    const int track_start = (game_screen->Col - track_size) / 2;
+    const int track_start = (game_screen.Col - track_size) / 2;
 
-    for (int i = 0; i <= game_screen->Row; i++)
+    for (int i = 0; i <= game_screen.Row; i++)
     {
         frame_buffer << TC::move_cursor(i, track_start) << "║║";
         const int left_side_ground = track_start + Lane_size + 5;
@@ -149,11 +149,11 @@ int render::render_game(Cars* player_car, const Screen* game_screen, std::string
     const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
     const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
 
-    frame_buffer << TC::move_cursor(game_screen->Row - 1, ( game_screen->Col - (game_screen->Col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
-    frame_buffer << TC::move_cursor(game_screen->Row - 1, track_end + (game_screen->Col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
+    frame_buffer << TC::move_cursor(game_screen.Row - 1, ( game_screen.Col - (game_screen.Col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    frame_buffer << TC::move_cursor(game_screen.Row - 1, track_end + (game_screen.Col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(game_screen->Row, game_screen->Col, track_end, static_cast<int>(game_state->gameTime), player_car);
+    frame_buffer << print_infotainment_screen(game_screen.Row, game_screen.Col, track_end, static_cast<int>(game_state->gameTime), player_car);
 
     // Drawing player car
     frame_buffer << print_race_car(player_car);
@@ -192,10 +192,10 @@ int render::render_game(Cars* player_car, const Screen* game_screen, std::string
     }
 
     // Decrement player car fuel and tyre health
-    if (static_cast<int>(game_state->gameTime) % 60 == 0)
+    if (static_cast<int>(game_state->gameTick) % 60 == 0)
     {
-        player_car->tyre_health -=  1;
-        player_car->fuel -= gameplay_settings->fuel_degradation;
+        player_car->tyre_health -=  gameplay_settings.tyre_degradation;
+        player_car->fuel -= gameplay_settings.fuel_degradation;
 
     }
 
@@ -212,36 +212,36 @@ int render::render_game(Cars* player_car, const Screen* game_screen, std::string
 
 
 
-void render::render_score(const int high_score, const int score, const int row, const int col, const std::string& game_over_message)
+void render::render_score(const int high_score, const int score, const Screen game_screen, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
 
     constexpr int score_page_height = 13;
 
-    int i = (row - score_page_height)/2;
+    int i = (game_screen.Row - score_page_height)/2;
     if (!game_over_message.empty())
     {
-        score_buffer << TC::move_cursor(i, (col - 9)/ 2) << "GAME OVER";
+        score_buffer << TC::move_cursor(i, (game_screen.Col - 9)/ 2) << "GAME OVER";
         i += 2;
-        score_buffer << TC::move_cursor(i, (col - static_cast<int>(game_over_message.length())) / 2) << game_over_message;
+        score_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(game_over_message.length())) / 2) << game_over_message;
         i += 2;
     } else
     {
         for (const auto& str: score_title)
         {
-            score_buffer << TC::move_cursor(i, (col - score_title_cols) / 2) << str;
+            score_buffer << TC::move_cursor(i, (game_screen.Col - score_title_cols) / 2) << str;
             i++;
         }
         i += 2;
     }
 
-    score_buffer << TC::move_cursor(i, (col - 15) / 2) << "HIGH SCORE: " << high_score;
+    score_buffer << TC::move_cursor(i, (game_screen.Col - 15) / 2) << "HIGH SCORE: " << high_score;
     i += 2;
-    score_buffer << TC::move_cursor(i, (col - 15) / 2) << "YOUR SCORE: " << score;
+    score_buffer << TC::move_cursor(i, (game_screen.Col - 15) / 2) << "YOUR SCORE: " << score;
     i += 2;
 
     const std::string message = "Press [H] for Main Menu";
-    score_buffer << TC::move_cursor(i, (col - static_cast<int>(message.length())) / 2) << message <<
+    score_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(message.length())) / 2) << message <<
          std::endl;
 
     std::cout << score_buffer.str() << std::flush;
