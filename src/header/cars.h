@@ -7,7 +7,9 @@
 #include <string>
 #include <vector>
 
-struct Car_Designs
+#include "gameSettings.h"
+
+struct Car_Design
 {
     std::string body;
     std::string bumper;
@@ -32,8 +34,16 @@ public:
     Cars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
     void move_left(int steps);
     void move_right(int steps);
-    void reset_car(int Row, int Col);
+    void reset_car(Screen game_screen, int car_y_position);
 
+};
+
+class EnemyCars: public Cars
+{
+public:
+    bool isActive = true;
+    bool collision(int player_x, int player_y) const;
+    EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
 };
 
 

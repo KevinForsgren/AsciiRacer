@@ -1,12 +1,10 @@
-//
-// Created by kevin on 9/4/26.
-//
 
 #ifndef ASCIIRACER_ASCIIART_H
 #define ASCIIRACER_ASCIIART_H
 #include <string>
 #include <vector>
 #include "terminal.h"
+#include "./cars.h"
 
 using TC = TerminalControl;
 
@@ -123,6 +121,16 @@ const std::vector<std::string> stone_dash = {
 const std::vector<std::string> wooden_log = {
     R"(_ __\ \_____,)",
     "[_[___>⌢<___#"
+};
+
+
+static std::vector<Car_Design> car_designs = {
+    {.body = TC::tc_color(220, 40, 55), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(190, 190, 190)},
+    {.body = TC::tc_color(45, 105, 225), .bumper = TC::tc_color(235, 235, 235), .tyre = TC::tc_color(180, 180, 180)},
+    {.body = TC::tc_color(30, 175, 95), .bumper = TC::tc_color(245, 245, 245), .tyre = TC::tc_color(185, 185, 185)},
+    {.body = TC::tc_color(235, 115, 25), .bumper = TC::tc_color(250, 240, 220), .tyre = TC::tc_color(195, 195, 195)},
+    {.body = TC::tc_color(145, 65, 210), .bumper = TC::tc_color(240, 235, 250), .tyre = TC::tc_color(185, 185, 190)},
+    {.body = TC::tc_color(230, 185, 25), .bumper = TC::tc_color(255, 250, 220), .tyre = TC::tc_color(220, 220, 225)},
 };
 
 class AsciiArt

@@ -22,6 +22,7 @@ public:
     GameState* game_state,
     GameplaySettings gameplay_settings
     );
+  static std::string print_race_car(const Cars* car);
   static void render_score(int high_score, int score, Screen game_screen, const std::string& game_over_message);
 };
 

@@ -1,5 +1,6 @@
 #include "header/terminal.h"
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -37,6 +38,24 @@ std::string TerminalControl::tc_color(int const R, int const G, int const B)
 std::string TerminalControl::tc_background(const int R, const int G, const int B)
 {
     return "\033[48;2;" + std::to_string(R) + ";" + std::to_string(G) + ";" + std::to_string(B) + "m";
+}
+
+
+/**
+ * Generates a random number from the given range
+ * @param min Range starts from
+ * @param max Range ends
+ * @return the random integer
+ */
+int TerminalControl::random_int(const int min, const int max)
+{
+    std::random_device device;
+
+    std::mt19937 gen(device());
+    std::uniform_int_distribution<> distribution(min, max);
+
+    return distribution(gen);
+
 }
 
 

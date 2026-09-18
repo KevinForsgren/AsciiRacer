@@ -4,6 +4,7 @@
 #include <fstream>
 #include <filesystem>
 
+#include "header/AsciiArt.h"
 #include "header/terminal.h"
 #include "header/render.h"
 #include "header/cars.h"
@@ -15,6 +16,8 @@
 // #include <unistd.h>
 // #include <termios.h>
 // #endif
+
+static void manage_enemies(EnemyCars* enemy, Screen game_screen);
 
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
@@ -39,19 +42,37 @@ int main()
     ScreenMode current_screen_mode = MainMenu;
     Screen game_screen{};
     GameplaySettings gameplay_settings{};
+    GameState game_state{};
 
     //Getting Screen Properties
     TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
     // Initializing Player Car
     Cars player_car{TC::tc_color(35,125,235), TC::tc_color(225,215,65), TC::tc_color(220,220,225)};
-    player_car.reset_car(game_screen.Row, game_screen.Col);
+    player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+
     handle_high_score(&player_car.high_score, false, FilePath);
 
-
     // Initialize inGames time and tick
-    GameState game_state{};
     auto previousTime = Clock::now();
+
+    //Making enemy cars
+    EnemyCars* enemies[4];
+
+    const int rand_1 = TC::random_int(0, 5);
+    const int rand_2 = TC::random_int(0, 5);
+    const int rand_3 = TC::random_int(0, 5);
+    const int rand_4 = TC::random_int(0, 5);
+
+    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre};
+    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre};
+    EnemyCars enemy3{car_designs[rand_3].body, car_designs[rand_3].bumper, car_designs[rand_3].tyre};
+    EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
+
+    enemies[0] = &enemy1;
+    enemies[1] = &enemy2;
+    enemies[2] = &enemy3;
+    enemies[3] = &enemy4;
 
     while (true)
     {
@@ -96,6 +117,12 @@ int main()
             game_state.gameTick = 0;
             game_state.gameTime = 0;
 
+            // Resetting all enemies
+            for (const auto& enemy: enemies)
+            {
+                enemy->reset_car(game_screen, 1);
+            }
+
             render::render_pause_menu(game_screen);
 
             char pause_inpT;
@@ -106,7 +133,7 @@ int main()
                     gameplay_settings.steps = 12;
                     gameplay_settings.fuel_degradation = 11;
                     gameplay_settings.tyre_degradation = 7;
-                    gameplay_settings.chassis_degradation = 0;
+                    gameplay_settings.chassis_degradation = 5;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'm' || pause_inpT == 'M')
@@ -114,7 +141,7 @@ int main()
                     gameplay_settings.steps = 2;
                     gameplay_settings.fuel_degradation = 15;
                     gameplay_settings.tyre_degradation = 10;
-                    gameplay_settings.chassis_degradation = 0;
+                    gameplay_settings.chassis_degradation = 10;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'h' || pause_inpT == 'H')
@@ -122,7 +149,7 @@ int main()
                     gameplay_settings.steps = 1;
                     gameplay_settings.fuel_degradation = 20;
                     gameplay_settings.tyre_degradation = 13;
-                    gameplay_settings.chassis_degradation = 0;
+                    gameplay_settings.chassis_degradation = 15;
                     current_screen_mode = Gameplay;
                 }
             }
@@ -148,10 +175,36 @@ int main()
                 }
             }
 
+            if (game_state.gameTick % 5 == 0)
+            {
+                for (const auto& enemy: enemies)
+                {
+                    manage_enemies(enemy, game_screen);
+                }
+            }
+
+
+            for (const auto& enemy: enemies)
+            {
+
+                if (enemy->isActive)
+                {
+                    std::cout << render::print_race_car(enemy);
+                }
+
+                if (enemy->collision(player_car.x_position, player_car.y_position))
+                {
+                    Message = "Car crashed with incoming traffic";
+                    PlayerScore = player_car.score;
+                    player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+                    current_screen_mode = ScoreBoard;
+                }
+            }
+
             if (render::render_game(&player_car, game_screen, &Message, &game_state, gameplay_settings) > 0)
             {
                 PlayerScore = player_car.score;
-                player_car.reset_car(game_screen.Row, game_screen.Col);
+                player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
                 current_screen_mode = ScoreBoard;
             }
 
@@ -194,8 +247,6 @@ int main()
     return 0;
 }
 
-// TODO:- fix gameTime => currently gameTime starts when the player loads the script and keeps increasing but i want to only start gameTime when inside gameplay block
-// FIXME:- gameTime
 
 static bool handle_high_score(int* high_score, bool write_mode, const std::string& file_path)
 {
@@ -253,4 +304,17 @@ static bool handle_high_score(int* high_score, bool write_mode, const std::strin
     inFile.close();
     return inFile.good();
 
+}
+
+
+void manage_enemies(EnemyCars* enemy, const Screen game_screen)
+{
+    if ( (enemy->y_position + enemy->height ) >= (game_screen.Row - 1)  )
+    {
+        enemy->reset_car(game_screen, 1);
+
+    } else
+    {
+        enemy->y_position++;
+    }
 }

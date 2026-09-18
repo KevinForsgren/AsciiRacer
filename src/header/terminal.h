@@ -18,6 +18,7 @@ class TerminalControl
         static bool switch_raw_mode(bool);
         static std::string tc_color(int, int, int);
         static std::string tc_background(int, int, int);
+        static int random_int(int min, int max);
 };
 
 
