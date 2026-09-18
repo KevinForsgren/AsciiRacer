@@ -23,6 +23,14 @@ struct Screen
     int Col;
 };
 
+struct Track
+{
+    int TrackStart;
+    int LaneSize;
+    int GroundSize;
+    int TrackEnd;
+};
+
 struct GameState
 {
     uint64_t gameTick = 0;

@@ -42,6 +42,10 @@ int main()
     ScreenMode current_screen_mode = MainMenu;
     Screen game_screen{};
     GameplaySettings gameplay_settings{};
+    Track race_track{
+        .LaneSize = 12,
+        .GroundSize = 17
+    };
     GameState game_state{};
 
     //Getting Screen Properties
@@ -53,11 +57,9 @@ int main()
 
     handle_high_score(&player_car.high_score, false, FilePath);
 
-    // Initialize inGames time and tick
-    auto previousTime = Clock::now();
 
     //Making enemy cars
-    EnemyCars* enemies[4];
+    EnemyCars* enemies[3];
 
     const int rand_1 = TC::random_int(0, 5);
     const int rand_2 = TC::random_int(0, 5);
@@ -67,12 +69,15 @@ int main()
     EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre};
     EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre};
     EnemyCars enemy3{car_designs[rand_3].body, car_designs[rand_3].bumper, car_designs[rand_3].tyre};
-    EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
+    // EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
 
     enemies[0] = &enemy1;
     enemies[1] = &enemy2;
     enemies[2] = &enemy3;
-    enemies[3] = &enemy4;
+    // enemies[3] = &enemy4;
+
+    // Initialize inGames time and tick
+    auto previousTime = Clock::now();
 
     while (true)
     {
@@ -111,7 +116,6 @@ int main()
         }
         else if (current_screen_mode == Pause)
         {
-            // Manage PauseScreen
 
             // Reset gameTick and gameTime to 0 for every new gameplay
             game_state.gameTick = 0;
@@ -120,7 +124,20 @@ int main()
             // Resetting all enemies
             for (const auto& enemy: enemies)
             {
-                enemy->reset_car(game_screen, 1);
+                // TODO : create fuel and tyre refuel mechanics
+                // TODO: place ground area materials
+
+                // FIXME:- Now need to spawn enemy one by one and then keep spawning them
+                for (const auto& traffic : enemies)
+                {
+                    int rand_y = TC::random_int(1, 4);
+                    enemy->reset_car(game_screen, rand_y);
+                    if (enemy->x_position == traffic->x_position)
+                    {
+                        int rand_offset = TC::random_int(3, 7);
+                        enemy->y_position = traffic->y_position + traffic->height + rand_offset;
+                    }
+                }
             }
 
             render::render_pause_menu(game_screen);
@@ -157,7 +174,9 @@ int main()
         }
         else if (current_screen_mode == Gameplay)
         {
-            // Gaming screen logic here
+            std::stringstream frameBuffer;
+
+            frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
 
             char gameplay_inpT;
 
@@ -183,30 +202,64 @@ int main()
                 }
             }
 
-
+            // Detecting traffic Collision
             for (const auto& enemy: enemies)
             {
-
                 if (enemy->isActive)
                 {
-                    std::cout << render::print_race_car(enemy);
+                    frameBuffer << render::print_race_car(enemy);
                 }
 
                 if (enemy->collision(player_car.x_position, player_car.y_position))
                 {
                     Message = "Car crashed with incoming traffic";
-                    PlayerScore = player_car.score;
-                    player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
-                    current_screen_mode = ScoreBoard;
                 }
             }
 
-            if (render::render_game(&player_car, game_screen, &Message, &game_state, gameplay_settings) > 0)
+            // Detecting track collision and car status
+            if (player_car.x_position <= (race_track.TrackStart + 1) || (player_car.x_position + player_car.width) >= (race_track.TrackEnd))
+            {
+                Message = "Car Collides with track";
+            }
+
+            if (player_car.tyre_health <= 0 || player_car.fuel <= 0 || player_car.chassis_health <= 0)
+            {
+                if (player_car.tyre_health <= 0)
+                {
+                    Message = "Tyre Punctured";
+                }
+                else if (player_car.chassis_health == 0)
+                {
+                    Message = "Car Chassis Destroyed";
+                }
+                else
+                {
+                    Message = "Empty Fuel Tank";
+                }
+
+                if (player_car.score > player_car.high_score)
+                {
+                    player_car.high_score = player_car.score;
+                }
+            }
+
+            // Quitting game
+            if (!Message.empty())
             {
                 PlayerScore = player_car.score;
                 player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+
+                if (player_car.score > player_car.high_score)
+                {
+                    player_car.high_score = player_car.score;
+                }
+
                 current_screen_mode = ScoreBoard;
             }
+
+            game_state.gameTick++;
+
+            std::cout << frameBuffer.str() << std::flush;
 
         }
         else if (current_screen_mode == ScoreBoard)

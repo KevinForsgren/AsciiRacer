@@ -15,10 +15,10 @@ class render
 public:
   static void render_main_menu(int row, int col);
   static void render_pause_menu(Screen game_screen);
-  static int render_game(
+  static std::string render_game(
     Cars* player_car,
     Screen game_screen,
-    std::string* game_over_message,
+    Track* race_track,
     GameState* game_state,
     GameplaySettings gameplay_settings
     );

@@ -16,9 +16,6 @@ static std::string print_meter(int current_capacity, int max_capacity);
 // Aliases
 using TC = TerminalControl;
 
-constexpr int Lane_size = 12;
-constexpr int Ground_area = Lane_size + 5;
-
 
 /**
  * Prints the game's menu screen
@@ -104,46 +101,50 @@ void render::render_pause_menu(const Screen game_screen)
  * Prints the main racing track, cars and other ui to the terminal
  * @param player_car pointer to a class Car's object
  * @param game_screen pointer to game screen properties
- * @param game_over_message pointer to game over message
  * @param game_state
+ * @param race_track
  * @param gameplay_settings
  */
-int render::render_game(Cars* player_car, const Screen game_screen, std::string* game_over_message, GameState* game_state, const GameplaySettings gameplay_settings)
+std::string render::render_game(Cars* player_car,
+    const Screen game_screen,
+    Track* race_track,
+    GameState* game_state,
+    const GameplaySettings gameplay_settings)
 {
 
 
     std::stringstream frame_buffer;
 
     // Drawing track
-    constexpr int track_size = (5 * Lane_size) + 10;
-    const int track_start = (game_screen.Col - track_size) / 2;
+    const int track_size = (5 * race_track->LaneSize) + 10;
+    race_track->TrackStart = (game_screen.Col - track_size) / 2;
 
     for (int i = 0; i <= game_screen.Row; i++)
     {
-        frame_buffer << TC::move_cursor(i, track_start) << "║║";
-        const int left_side_ground = track_start + Ground_area;
+        frame_buffer << TC::move_cursor(i, race_track->TrackStart) << "║║";
+        const int left_side_ground = race_track->TrackStart + race_track->GroundSize;
         frame_buffer << TC::move_cursor(i, left_side_ground) << "┃";
-        const int first_lane = left_side_ground + Lane_size;
+        const int first_lane = left_side_ground + race_track->LaneSize;
         frame_buffer << TC::move_cursor(i, first_lane) << "।";
-        const int middle_lane = first_lane + Lane_size;
+        const int middle_lane = first_lane + race_track->LaneSize;
         frame_buffer << TC::move_cursor(i, middle_lane) << "।" ;
-        const int last_lane = middle_lane + Lane_size;
+        const int last_lane = middle_lane + race_track->LaneSize;
         frame_buffer << TC::move_cursor(i, last_lane) << "┃";
-        const int right_side_ground = last_lane + Ground_area;
+        const int right_side_ground = last_lane + race_track->GroundSize;
         frame_buffer << TC::move_cursor(i, right_side_ground) << "║║";
     }
-    const int track_end = track_start + (5 * Lane_size) + 10;
+    race_track->TrackEnd = race_track->TrackStart + track_size;
 
 
     // Printing player guides
     const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
     const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
 
-    frame_buffer << TC::move_cursor(game_screen.Row - 1, ( game_screen.Col - (game_screen.Col - track_start) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
-    frame_buffer << TC::move_cursor(game_screen.Row - 1, track_end + (game_screen.Col - track_end - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
+    frame_buffer << TC::move_cursor(game_screen.Row - 1, ( game_screen.Col - (game_screen.Col - race_track->TrackStart) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    frame_buffer << TC::move_cursor(game_screen.Row - 1, race_track->TrackEnd + (game_screen.Col - race_track->TrackEnd - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(game_screen.Row, game_screen.Col, track_end, static_cast<int>(game_state->gameTime), player_car);
+    frame_buffer << print_infotainment_screen(game_screen.Row, game_screen.Col, race_track->TrackEnd, static_cast<int>(game_state->gameTime), player_car);
 
     // Drawing player car
     frame_buffer << print_race_car(player_car);
@@ -160,7 +161,7 @@ int render::render_game(Cars* player_car, const Screen game_screen, std::string*
     // Decrement player car tyre and chassis health when driving on ground
     if (static_cast<int>(game_state->gameTick) % 10 == 0)
     {
-        if (player_car->x_position >= (track_end - Ground_area) || player_car->x_position <= (track_start + Ground_area))
+        if (player_car->x_position >= (race_track->TrackEnd - race_track->GroundSize) || player_car->x_position <= (race_track->TrackStart + race_track->GroundSize))
         {
             player_car->tyre_health -= gameplay_settings.tyre_degradation;
             player_car->chassis_health -= gameplay_settings.chassis_degradation;
@@ -172,45 +173,7 @@ int render::render_game(Cars* player_car, const Screen game_screen, std::string*
     // need to implement reward collecting score increment
     player_car->score = static_cast<int>(game_state->gameTick * 0.25);
 
-
-    // Detecting track collision and car status
-    if (player_car->x_position <= (track_start + 1) || (player_car->x_position + player_car->width) >= (track_end))
-    {
-        *game_over_message = "Car Collide to track";
-        if (player_car->score > player_car->high_score)
-        {
-            player_car->high_score = player_car->score;
-        }
-        return 1;
-    }
-
-    if (player_car->tyre_health <= 0 || player_car->fuel <= 0 || player_car->chassis_health <= 0)
-    {
-        if (player_car->tyre_health <= 0)
-        {
-            *game_over_message = "Tyre Punctured";
-        }
-        else if (player_car->chassis_health == 0)
-        {
-            *game_over_message = "Car Chassis Destroyed";
-        }
-        else
-        {
-            *game_over_message = "Empty Fuel Tank";
-        }
-
-        if (player_car->score > player_car->high_score)
-        {
-            player_car->high_score = player_car->score;
-        }
-        return 1;
-    }
-
-    std::cout << frame_buffer.str() << std::flush;
-
-    game_state->gameTick++;
-
-    return 0;
+    return frame_buffer.str();
 }
 
 
