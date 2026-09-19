@@ -1,7 +1,3 @@
-//
-// Created by kevin on 9/18/26.
-//
-
 #include "header/environment.h"
 
 #include "header/AsciiArt.h"
@@ -41,8 +37,8 @@ void Collector::reset_collector(const Screen game_screen)
 
     x_position = spawn_x[index];
 
-    // provide y position
-    y_position = 10;
+    // TODO:- provide y position after checking area is empty from traffic
+    y_position = 5;
 
 }
 
@@ -53,13 +49,6 @@ void Collector::manage_collector(const Screen game_screen)
     {
         reset_collector(game_screen);
         isActive = false;
-        // for (int i = 0; i < 3; i++)
-        // {
-        //     if (enemy->x_position == Enemies[i]->x_position && enemy->enemy_id != Enemies[i]->enemy_id)
-        //     {
-        //         enemy->y_position = Enemies[i]->y_position + Enemies[i]->height + 10;
-        //     }
-        // }
 
     } else
     {
@@ -69,15 +58,14 @@ void Collector::manage_collector(const Screen game_screen)
 
 std::string Collector::spawn_collector() const
 {
-    std::stringstream buffer;
+    std::stringstream collector_buffer;
 
-    int a = 0;
-    for (const auto& row: collector_model)
+    for (int i = 0; i < 3; i++)
     {
-        buffer << TC::move_cursor(y_position + 0, x_position) << row;
-        a++;
+        collector_buffer << TC::move_cursor(y_position + i, x_position);
+        collector_buffer << collector_model[i];
     }
 
-    return buffer.str();
+    return collector_buffer.str();
 }
 

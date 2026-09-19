@@ -82,10 +82,6 @@ int main()
     enemies[1] = &enemy2;
     enemies[2] = &enemy3;
 
-    // const int rand_4 = TC::random_int(0, 5);
-    // EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
-    // enemies[3] = &enemy4;
-
     // Initialize inGames time and tick
     auto previousTime = Clock::now();
 
@@ -211,17 +207,26 @@ int main()
                 if (tyre.isActive) tyre.manage_collector(game_screen);
             }
 
-            // Spawning collector
-            int game_time_int = static_cast<int>(game_state.gameTime);
-            if ( game_time_int % 5 == 0  && player_car.fuel < 450) fuel.isActive = true;
-            if ( game_time_int % 5 == 0  && player_car.tyre_health < 450) tyre.isActive = true;
 
             // Printing collector on screen
             if (fuel.isActive) frameBuffer << fuel.spawn_collector();
             if (tyre.isActive) frameBuffer << tyre.spawn_collector();
 
+            // Spawning collector
+            if ( game_state.gameTick % 300 == 0  && player_car.fuel < 450)
+            {
+                fuel.isActive = true;
+                fuel.reset_collector(game_screen);
+            }
 
-            // If Collector picked by player
+            if ( game_state.gameTick % 300 == 0  && player_car.tyre_health < 450)
+            {
+                tyre.isActive = true;
+                tyre.reset_collector(game_screen);
+            }
+
+
+            // Checking collector collision with player
             if (fuel.isActive && fuel.collision(player_car))
             {
                 (player_car.fuel += fuel.value) >= 1000 ? player_car.fuel = 1000 : player_car.fuel += fuel.value;
@@ -234,12 +239,12 @@ int main()
                 tyre.isActive = false;
             }
 
-            // Detecting traffic Collision
+            // Detecting traffic Collision and rendering them
             for (const auto& enemy: enemies)
             {
                 if (enemy->isActive) frameBuffer << render::print_race_car(enemy);
 
-                // if (enemy->collision(player_car.x_position, player_car.y_position) && enemy->isActive) Message = "Car crashed with incoming traffic";
+                if (enemy->collision(player_car.x_position, player_car.y_position) && enemy->isActive) Message = "Car crashed with incoming traffic";
             }
 
             // Detecting track collision and car status
@@ -279,12 +284,13 @@ int main()
             }
 
             // Activating traffic
+            /*
             if (game_state.gameTick >= 80 && enemies[0]->isActive == false) enemies[0]->isActive = true;
 
             if (game_state.gameTick >= 120 && enemies[1]->isActive == false) enemies[1]->isActive = true;
 
             if (game_state.gameTick >= 200 && enemies[2]->isActive == false) enemies[2]->isActive = true;
-
+            */
 
 
             std::cout << frameBuffer.str() << std::flush;
@@ -311,7 +317,7 @@ int main()
         }
 
 
-        // checks for loop completion time and sleep if code executed before targeted time
+        // Checks for loop completion time and sleep if code executed before targeted time
         if (auto frameTime = Clock::now() - startTime; frameTime < targetFrameTime)
         {
             std::this_thread::sleep_for(targetFrameTime - frameTime);
@@ -321,7 +327,7 @@ int main()
 
     handle_high_score(&player_car.high_score, true, FilePath);
 
-    // turning terminal back to normal
+    // Turning terminal back to normal
     TC::switch_raw_mode(false);
     TC::main_window();
     TC::show_cursor();
