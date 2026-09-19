@@ -8,6 +8,7 @@
 #include "header/terminal.h"
 #include "header/render.h"
 #include "header/cars.h"
+#include "header/environment.h"
 #include "header/gameSettings.h"
 
 // #if defined(_WIN32)
@@ -17,7 +18,9 @@
 // #include <termios.h>
 // #endif
 
-static void manage_enemies(EnemyCars* enemy, Screen game_screen);
+// TODO: place ground area materials
+
+static void manage_enemies(EnemyCars* Enemies[], EnemyCars* enemy, Screen game_screen);
 
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
@@ -58,22 +61,29 @@ int main()
     handle_high_score(&player_car.high_score, false, FilePath);
 
 
+    // Collectors
+    Collector fuel{};
+    Collector tyre{};
+    fuel.collector_model = fuel_collector;
+    tyre.collector_model = tyre_collector;
+
     //Making enemy cars
     EnemyCars* enemies[3];
 
     const int rand_1 = TC::random_int(0, 5);
     const int rand_2 = TC::random_int(0, 5);
     const int rand_3 = TC::random_int(0, 5);
-    const int rand_4 = TC::random_int(0, 5);
 
-    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre};
-    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre};
-    EnemyCars enemy3{car_designs[rand_3].body, car_designs[rand_3].bumper, car_designs[rand_3].tyre};
-    // EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
+    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 123};
+    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 234};
+    EnemyCars enemy3{car_designs[rand_3].body, car_designs[rand_3].bumper, car_designs[rand_3].tyre, 312};
 
     enemies[0] = &enemy1;
     enemies[1] = &enemy2;
     enemies[2] = &enemy3;
+
+    // const int rand_4 = TC::random_int(0, 5);
+    // EnemyCars enemy4{car_designs[rand_4].body, car_designs[rand_4].bumper, car_designs[rand_4].tyre};
     // enemies[3] = &enemy4;
 
     // Initialize inGames time and tick
@@ -124,17 +134,13 @@ int main()
             // Resetting all enemies
             for (const auto& enemy: enemies)
             {
-                // TODO : create fuel and tyre refuel mechanics
-                // TODO: place ground area materials
 
-                // FIXME:- Now need to spawn enemy one by one and then keep spawning them
                 for (const auto& traffic : enemies)
                 {
-                    int rand_y = TC::random_int(1, 4);
-                    enemy->reset_car(game_screen, rand_y);
-                    if (enemy->x_position == traffic->x_position)
+                    enemy->reset_car(game_screen, 1);
+                    if (enemy->x_position == traffic->x_position && enemy->enemy_id != traffic->enemy_id)
                     {
-                        int rand_offset = TC::random_int(3, 7);
+                        int rand_offset = TC::random_int(3, 5);
                         enemy->y_position = traffic->y_position + traffic->height + rand_offset;
                     }
                 }
@@ -174,12 +180,8 @@ int main()
         }
         else if (current_screen_mode == Gameplay)
         {
-            std::stringstream frameBuffer;
-
-            frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
 
             char gameplay_inpT;
-
             if (TC::read_input(&gameplay_inpT))
             {
                 switch (gameplay_inpT)
@@ -194,26 +196,50 @@ int main()
                 }
             }
 
+            std::stringstream frameBuffer;
+
+            frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
+
             if (game_state.gameTick % 5 == 0)
             {
                 for (const auto& enemy: enemies)
                 {
-                    manage_enemies(enemy, game_screen);
+                    if (enemy->isActive) manage_enemies(enemies, enemy, game_screen);
                 }
+
+                if (fuel.isActive) fuel.manage_collector(game_screen);
+                if (tyre.isActive) tyre.manage_collector(game_screen);
+            }
+
+            // Spawning collector
+            int game_time_int = static_cast<int>(game_state.gameTime);
+            if ( game_time_int % 5 == 0  && player_car.fuel < 450) fuel.isActive = true;
+            if ( game_time_int % 5 == 0  && player_car.tyre_health < 450) tyre.isActive = true;
+
+            // Printing collector on screen
+            if (fuel.isActive) frameBuffer << fuel.spawn_collector();
+            if (tyre.isActive) frameBuffer << tyre.spawn_collector();
+
+
+            // If Collector picked by player
+            if (fuel.isActive && fuel.collision(player_car))
+            {
+                (player_car.fuel += fuel.value) >= 1000 ? player_car.fuel = 1000 : player_car.fuel += fuel.value;
+                fuel.isActive = false;
+            }
+
+            if (tyre.isActive && tyre.collision(player_car))
+            {
+                (player_car.tyre_health += tyre.value) >= 1000 ? player_car.tyre_health = 1000 : player_car.tyre_health += tyre.value;
+                tyre.isActive = false;
             }
 
             // Detecting traffic Collision
             for (const auto& enemy: enemies)
             {
-                if (enemy->isActive)
-                {
-                    frameBuffer << render::print_race_car(enemy);
-                }
+                if (enemy->isActive) frameBuffer << render::print_race_car(enemy);
 
-                if (enemy->collision(player_car.x_position, player_car.y_position))
-                {
-                    Message = "Car crashed with incoming traffic";
-                }
+                // if (enemy->collision(player_car.x_position, player_car.y_position) && enemy->isActive) Message = "Car crashed with incoming traffic";
             }
 
             // Detecting track collision and car status
@@ -236,11 +262,6 @@ int main()
                 {
                     Message = "Empty Fuel Tank";
                 }
-
-                if (player_car.score > player_car.high_score)
-                {
-                    player_car.high_score = player_car.score;
-                }
             }
 
             // Quitting game
@@ -257,9 +278,17 @@ int main()
                 current_screen_mode = ScoreBoard;
             }
 
-            game_state.gameTick++;
+            // Activating traffic
+            if (game_state.gameTick >= 80 && enemies[0]->isActive == false) enemies[0]->isActive = true;
+
+            if (game_state.gameTick >= 120 && enemies[1]->isActive == false) enemies[1]->isActive = true;
+
+            if (game_state.gameTick >= 200 && enemies[2]->isActive == false) enemies[2]->isActive = true;
+
+
 
             std::cout << frameBuffer.str() << std::flush;
+            game_state.gameTick++;
 
         }
         else if (current_screen_mode == ScoreBoard)
@@ -359,12 +388,24 @@ static bool handle_high_score(int* high_score, bool write_mode, const std::strin
 
 }
 
-
-void manage_enemies(EnemyCars* enemy, const Screen game_screen)
+//FIXME:- needs to fix traffic spawning logic (kinda buggy and wierd)
+// Make it a class function instead
+static void manage_enemies(EnemyCars* Enemies[],EnemyCars* enemy, const Screen game_screen)
 {
     if ( (enemy->y_position + enemy->height ) >= (game_screen.Row - 1)  )
     {
         enemy->reset_car(game_screen, 1);
+        const int rand = TC::random_int(0, 5);
+        enemy->update_car_model(car_designs[rand].body, car_designs[rand].bumper, car_designs[rand].tyre);
+
+        for (int i = 0; i < 3; i++)
+        {
+            // enemy->reset_car(game_screen, 1);
+            if (enemy->x_position == Enemies[i]->x_position && enemy->enemy_id != Enemies[i]->enemy_id)
+            {
+               enemy->y_position = Enemies[i]->y_position + Enemies[i]->height + 10;
+            }
+        }
 
     } else
     {

@@ -36,12 +36,6 @@ void Cars::move_left(const int steps)
     x_position -= steps;
 }
 
-struct Point
-{
-    int x;
-    int y;
-};
-
 
 /**
  * Move car to the right
@@ -73,12 +67,7 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position)
     spawn_x[1] = spawn_x[0] + 12;
     spawn_x[2] = spawn_x[0] - 12;
 
-    std::random_device device;
-
-    std::mt19937 gen(device());
-    std::uniform_int_distribution<> distribution(0, 2);
-
-    const int index = distribution(gen);
+    const int index = TC::random_int(0, 2);
     x_position = spawn_x[index];
 
     y_position = car_y_position;
@@ -92,8 +81,11 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position)
 }
 
 
-EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color) :
-    Cars(base_color, bumper_color, tyre_color) {}
+EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color, const int id) :
+    Cars(base_color, bumper_color, tyre_color)
+{
+    enemy_id = id;
+}
 
 
 
@@ -114,6 +106,12 @@ bool EnemyCars::collision(const int player_x, const int player_y) const
 
     // Else collision happened
     return true;
+}
+
+void EnemyCars::update_car_model(const std::string& base_color, const std::string& bumper_color,
+    const std::string& tyre_color)
+{
+    car_model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }
 
 

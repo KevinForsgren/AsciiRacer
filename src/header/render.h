@@ -19,7 +19,7 @@ public:
     Cars* player_car,
     Screen game_screen,
     Track* race_track,
-    GameState* game_state,
+    const GameState* game_state,
     GameplaySettings gameplay_settings
     );
   static std::string print_race_car(const Cars* car);

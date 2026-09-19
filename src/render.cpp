@@ -108,7 +108,7 @@ void render::render_pause_menu(const Screen game_screen)
 std::string render::render_game(Cars* player_car,
     const Screen game_screen,
     Track* race_track,
-    GameState* game_state,
+    const GameState* game_state,
     const GameplaySettings gameplay_settings)
 {
 

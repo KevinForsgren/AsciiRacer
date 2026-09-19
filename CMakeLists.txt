@@ -13,4 +13,6 @@ add_executable(AsciiRacer src/main.cpp
         src/header/cars.h
         src/header/cars.h
         src/header/gameSettings.h
+        src/environment.cpp
+        src/header/environment.h
 )

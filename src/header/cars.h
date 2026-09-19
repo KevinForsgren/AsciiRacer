@@ -41,9 +41,11 @@ public:
 class EnemyCars: public Cars
 {
 public:
-    bool isActive = true;
+    bool isActive = false;
+    int enemy_id;
+    EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color, int id);
     bool collision(int player_x, int player_y) const;
-    EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
+    void update_car_model(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
 };
 
 

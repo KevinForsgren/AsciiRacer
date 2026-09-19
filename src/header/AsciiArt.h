@@ -106,6 +106,23 @@ constexpr std::string block_full = "█";
 constexpr std::string non_block_full = "░";
 constexpr std::string block_lower = "▄";
 
+
+const std::vector<std::string> fuel_collector = {
+    "╭─╮",
+    "│F│",
+    "╰─╯"
+};
+
+const std::vector<std::string> tyre_collector = {
+    "╭─╮",
+    "│T│",
+    "╰─╯"
+};
+
+const std::string grass_1 = ".. .__.   .__ ...";
+const std::string grass_2 = " .... ... .. ....";
+const std::string grass_3 = "__ ... ....__ ...";
+
 const std::vector<std::string> stone_dotted = {
     "  ⡾⠛⢦⡀",
     "⣾⢋⣀⣤⡴⣿",
@@ -118,10 +135,10 @@ const std::vector<std::string> stone_dash = {
     " '-___-_+'"
 };
 
-const std::vector<std::string> wooden_log = {
-    R"(_ __\ \_____,)",
-    "[_[___>⌢<___#"
-};
+// const std::vector<std::string> wooden_log = {
+//     R"(_ __\ \_____,)",
+//     "[_[___>⌢<___#"
+// };
 
 
 static std::vector<Car_Design> car_designs = {
