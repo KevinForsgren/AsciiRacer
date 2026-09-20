@@ -16,6 +16,21 @@ struct Car_Design
     std::string tyre;
 };
 
+struct Traffic_Distribution
+{
+    int FirstRow[3];
+    int SecondRow[3];
+    int ThirdRow[3];
+};
+
+inline std::vector<Traffic_Distribution> traffic_distributions = {
+    {.FirstRow = {1, 1, 0}, .SecondRow = {0, 0, 1}, .ThirdRow = {1, 0, 0}},
+    {.FirstRow = {0, 1, 1}, .SecondRow = {1, 0, 0}, .ThirdRow = {0, 0, 1}},
+    {.FirstRow = {1, 0, 1}, .SecondRow = {0, 1, 0}, .ThirdRow = {1, 0, 0}},
+    {.FirstRow = {1, 0, 0}, .SecondRow = {0, 1, 1}, .ThirdRow = {0, 0, 1}},
+    {.FirstRow = {0, 0, 1}, .SecondRow = {1, 1, 0}, .ThirdRow = {1, 0, 0}},
+};
+
 class Cars
 {
 public:
@@ -35,7 +50,7 @@ public:
     void move_left(int steps);
     void move_right(int steps);
     void reset_car(Screen game_screen, int car_y_position);
-
+    void reset_car(Screen game_Screen, int car_y_position, int lane_index);
 };
 
 class EnemyCars: public Cars

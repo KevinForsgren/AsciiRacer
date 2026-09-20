@@ -69,9 +69,31 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position)
 
     const int index = TC::random_int(0, 2);
     x_position = spawn_x[index];
-
     y_position = car_y_position;
 
+    fuel = 1000;
+    chassis_health = 1000;
+    tyre_health = 1000;
+    score = 0;
+
+}
+
+void Cars::reset_car(const Screen game_Screen, const int car_y_position, const int lane_index)
+{
+
+    int screen_col = game_Screen.Col;
+    if (screen_col % 2 == 0)
+    {
+        screen_col++;
+    }
+
+    int spawn_x[3];
+    spawn_x[1] = (screen_col - width) / 2;
+    spawn_x[0] = spawn_x[1] - 12;
+    spawn_x[2] = spawn_x[1] + 12;
+
+    x_position = spawn_x[lane_index];
+    y_position = car_y_position;
 
     fuel = 1000;
     chassis_health = 1000;
@@ -86,7 +108,6 @@ EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_co
 {
     enemy_id = id;
 }
-
 
 
 bool EnemyCars::collision(const int player_x, const int player_y) const

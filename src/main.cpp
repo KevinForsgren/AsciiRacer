@@ -20,7 +20,8 @@
 
 // TODO: place ground area materials
 
-static void manage_enemies(EnemyCars* Enemies[], EnemyCars* enemy, Screen game_screen);
+static void spawn_traffic(EnemyCars* Enemies[], int enemies_size, Screen game_screen, int* current_car, const int traffic_distribution_row[]);
+static void manage_traffic(EnemyCars* Enemies[], Screen game_screen, int seed, int enemies_size = 5);
 
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
@@ -68,19 +69,22 @@ int main()
     tyre.collector_model = tyre_collector;
 
     //Making enemy cars
-    EnemyCars* enemies[3];
+    EnemyCars* enemies[5];
 
     const int rand_1 = TC::random_int(0, 5);
     const int rand_2 = TC::random_int(0, 5);
-    const int rand_3 = TC::random_int(0, 5);
 
-    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 123};
-    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 234};
-    EnemyCars enemy3{car_designs[rand_3].body, car_designs[rand_3].bumper, car_designs[rand_3].tyre, 312};
+    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 100};
+    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 200};
+    EnemyCars enemy3{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 300};
+    EnemyCars enemy4{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 400};
+    EnemyCars enemy5{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 500};
 
     enemies[0] = &enemy1;
     enemies[1] = &enemy2;
     enemies[2] = &enemy3;
+    enemies[3] = &enemy4;
+    enemies[4] = &enemy5;
 
     // Initialize inGames time and tick
     auto previousTime = Clock::now();
@@ -126,21 +130,6 @@ int main()
             // Reset gameTick and gameTime to 0 for every new gameplay
             game_state.gameTick = 0;
             game_state.gameTime = 0;
-
-            // Resetting all enemies
-            for (const auto& enemy: enemies)
-            {
-
-                for (const auto& traffic : enemies)
-                {
-                    enemy->reset_car(game_screen, 1);
-                    if (enemy->x_position == traffic->x_position && enemy->enemy_id != traffic->enemy_id)
-                    {
-                        int rand_offset = TC::random_int(3, 5);
-                        enemy->y_position = traffic->y_position + traffic->height + rand_offset;
-                    }
-                }
-            }
 
             render::render_pause_menu(game_screen);
 
@@ -198,11 +187,6 @@ int main()
 
             if (game_state.gameTick % 5 == 0)
             {
-                for (const auto& enemy: enemies)
-                {
-                    if (enemy->isActive) manage_enemies(enemies, enemy, game_screen);
-                }
-
                 if (fuel.isActive) fuel.manage_collector(game_screen);
                 if (tyre.isActive) tyre.manage_collector(game_screen);
             }
@@ -269,11 +253,16 @@ int main()
                 }
             }
 
-            // Quitting game
+            // Quitting game and Resetting Player and traffic
             if (!Message.empty())
             {
                 PlayerScore = player_car.score;
                 player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+
+                for (const auto& enemy: enemies)
+                {
+                    enemy->isActive = false;
+                }
 
                 if (player_car.score > player_car.high_score)
                 {
@@ -284,14 +273,16 @@ int main()
             }
 
             // Activating traffic
-            /*
-            if (game_state.gameTick >= 80 && enemies[0]->isActive == false) enemies[0]->isActive = true;
+            if (game_state.gameTick == 80 )
+            {
+                enemies[0]->isActive = true;
+                enemies[0]->reset_car(game_screen, 1);
+            }
 
-            if (game_state.gameTick >= 120 && enemies[1]->isActive == false) enemies[1]->isActive = true;
-
-            if (game_state.gameTick >= 200 && enemies[2]->isActive == false) enemies[2]->isActive = true;
-            */
-
+            if (game_state.gameTick >= 100 && game_state.gameTick % 5 == 0)
+            {
+                manage_traffic(enemies, game_screen, 2);
+            }
 
             std::cout << frameBuffer.str() << std::flush;
             game_state.gameTick++;
@@ -394,27 +385,69 @@ static bool handle_high_score(int* high_score, bool write_mode, const std::strin
 
 }
 
-//FIXME:- needs to fix traffic spawning logic (kinda buggy and wierd)
-// Make it a class function instead
-static void manage_enemies(EnemyCars* Enemies[],EnemyCars* enemy, const Screen game_screen)
+
+static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Screen game_screen, int* current_car, const int traffic_distribution_row[])
 {
-    if ( (enemy->y_position + enemy->height ) >= (game_screen.Row - 1)  )
+    for (int i = 0; i < 3; i++)
     {
-        enemy->reset_car(game_screen, 1);
-        const int rand = TC::random_int(0, 5);
-        enemy->update_car_model(car_designs[rand].body, car_designs[rand].bumper, car_designs[rand].tyre);
-
-        for (int i = 0; i < 3; i++)
+        if (traffic_distribution_row[i] == 1)
         {
-            // enemy->reset_car(game_screen, 1);
-            if (enemy->x_position == Enemies[i]->x_position && enemy->enemy_id != Enemies[i]->enemy_id)
+            if (Enemies[*current_car]->isActive)
             {
-               enemy->y_position = Enemies[i]->y_position + Enemies[i]->height + 10;
+                *current_car = (*current_car + 1) % enemies_size;
+                continue;
             }
-        }
 
-    } else
+            Enemies[*current_car]->isActive = true;
+
+            // Resetting car colors and attributes
+            const int rand = TC::random_int(0, 5);
+            Enemies[*current_car]->update_car_model(car_designs[rand].body, car_designs[rand].bumper, car_designs[rand].tyre);
+
+            const int y_offset = TC::random_int(0, 5);
+            Enemies[*current_car]->reset_car(game_screen, 1 + y_offset, i);
+
+            *current_car = (*current_car + 1) % enemies_size;
+
+        }
+    }
+}
+
+
+static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const int seed, const int enemies_size)
+{
+
+    const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[seed];
+    const int* row[] = {
+        ThirdRow,
+        SecondRow,
+        FirstRow
+    };
+
+    static int current_row = 0;
+    static int current_car = 1;
+
+    const int previous_car = (current_car + enemies_size - 1) % enemies_size;
+    if (Enemies[previous_car]->y_position >= 2 * Enemies[current_car]->height + 4)
     {
-        enemy->y_position++;
+
+        spawn_traffic(Enemies, enemies_size, game_screen, &current_car, row[current_row]);
+
+        current_row = ( current_row + 1 ) % 3;
+
+    }
+
+
+    // Deactivating any cars that are out of screen;
+    for (int i = 0; i < enemies_size; i++)
+    {
+        if ( Enemies[i]->y_position + Enemies[i]->height >= game_screen.Row - 1 )
+        {
+            Enemies[i]->isActive = false;
+        }
+        else
+        {
+            if (Enemies[i]->isActive) Enemies[i]->y_position++;
+        }
     }
 }
