@@ -168,48 +168,6 @@ public:
         return  car_model;
     }
 
-    static std::vector<std::string> race_light_dynamic(int seconds)
-    {
-        std::vector<std::string> race_light(5);
-
-        std::string color = TC::tc_color(255, 0, 0); // red
-
-        if (seconds < 2)
-        {
-            color = TC::tc_color(0, 255, 0); // green
-        }
-
-        race_light[0] = "══════════════╦═══════╦═══════╦══";
-        race_light[1] = "              ║       ║       ║  ";
-        if (seconds <= 1)
-        {
-            race_light[2] = color + "            [|||]   [|||]   [|||]";
-        }
-        else
-        {
-            race_light[2] = "            [   ]   [   ]   [   ]";
-        }
-
-        if (seconds <= 2)
-        {
-            race_light[3] = color + "            [|||]   [|||]   [|||]";
-        }
-        else
-        {
-            race_light[3] = "            [   ]   [   ]   [   ]";
-        }
-
-        if (seconds <= 3)
-        {
-            race_light[4] = color + "            [|||]   [|||]   [|||]" + TC::tc_color(255, 255, 255);
-        }
-        else
-        {
-            race_light[4] = "            [   ]   [   ]   [   ]";
-        }
-
-        return race_light;
-    }
 };
 
 #endif //ASCIIRACER_ASCIIART_H

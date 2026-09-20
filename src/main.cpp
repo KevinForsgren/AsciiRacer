@@ -202,14 +202,40 @@ int main()
             // Spawning collector
             if ( game_state.gameTick % 300 == 0  && player_car.fuel < 450)
             {
-                fuel.isActive = true;
-                fuel.reset_collector(game_screen);
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const int* row[] = {
+                    ThirdRow,
+                    SecondRow,
+                    FirstRow
+                };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    {
+                        fuel.isActive = true;
+                        fuel.reset_collector(game_screen, i);
+                    }
+                }
             }
 
             if ( game_state.gameTick % 300 == 0  && player_car.tyre_health < 450)
             {
-                tyre.isActive = true;
-                tyre.reset_collector(game_screen);
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const int* row[] = {
+                    ThirdRow,
+                    SecondRow,
+                    FirstRow
+                };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    {
+                        tyre.isActive = true;
+                        tyre.reset_collector(game_screen, i);
+                    }
+                }
             }
 
 

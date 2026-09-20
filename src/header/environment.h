@@ -23,9 +23,9 @@ public:
     std::vector<std::string> collector_model;
 
     [[nodiscard]] bool collision(const Cars& player) const;
-    void reset_collector(Screen game_screen);
+    void reset_collector(Screen game_screen, int lane_index);
     void manage_collector(Screen game_screen);
-    std::string spawn_collector() const;
+    [[nodiscard]] std::string spawn_collector() const;
 
 };
 
