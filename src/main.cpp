@@ -21,7 +21,7 @@
 // TODO: place ground area materials
 
 static void spawn_traffic(EnemyCars* Enemies[], int enemies_size, Screen game_screen, int* current_car, const int traffic_distribution_row[]);
-static void manage_traffic(EnemyCars* Enemies[], Screen game_screen, int seed, int enemies_size = 5);
+static void manage_traffic(EnemyCars* Enemies[], Screen game_screen, int seed, int* current_car, int* current_distribution_row, int enemies_size = 5);
 
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
@@ -130,6 +130,9 @@ int main()
             // Reset gameTick and gameTime to 0 for every new gameplay
             game_state.gameTick = 0;
             game_state.gameTime = 0;
+            game_state.current_traffic_car = 1;
+            game_state.current_traffic_distribution_row = 0;
+            game_state.seed = TC::random_int(0, 4);
 
             render::render_pause_menu(game_screen);
 
@@ -281,7 +284,11 @@ int main()
 
             if (game_state.gameTick >= 100 && game_state.gameTick % 5 == 0)
             {
-                manage_traffic(enemies, game_screen, 2);
+               if (game_state.current_traffic_distribution_row == 0)
+                {
+                    game_state.seed = TC::random_int(0, 4);
+                }
+                manage_traffic(enemies, game_screen, game_state.seed, &game_state.current_traffic_car, &game_state.current_traffic_distribution_row);
             }
 
             std::cout << frameBuffer.str() << std::flush;
@@ -404,8 +411,7 @@ static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Sc
             const int rand = TC::random_int(0, 5);
             Enemies[*current_car]->update_car_model(car_designs[rand].body, car_designs[rand].bumper, car_designs[rand].tyre);
 
-            const int y_offset = TC::random_int(0, 5);
-            Enemies[*current_car]->reset_car(game_screen, 1 + y_offset, i);
+            Enemies[*current_car]->reset_car(game_screen, 1 , i);
 
             *current_car = (*current_car + 1) % enemies_size;
 
@@ -414,7 +420,7 @@ static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Sc
 }
 
 
-static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const int seed, const int enemies_size)
+static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const int seed, int* current_car, int* current_distribution_row, const int enemies_size)
 {
 
     const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[seed];
@@ -424,16 +430,16 @@ static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const
         FirstRow
     };
 
-    static int current_row = 0;
-    static int current_car = 1;
 
-    const int previous_car = (current_car + enemies_size - 1) % enemies_size;
-    if (Enemies[previous_car]->y_position >= 2 * Enemies[current_car]->height + 4)
+    // static int current_car = 1;
+
+    const int previous_car = (*current_car + enemies_size - 1) % enemies_size;
+    if (Enemies[previous_car]->y_position >= 2 * Enemies[*current_car]->height + 4)
     {
 
-        spawn_traffic(Enemies, enemies_size, game_screen, &current_car, row[current_row]);
+        spawn_traffic(Enemies, enemies_size, game_screen, current_car, row[*current_distribution_row]);
 
-        current_row = ( current_row + 1 ) % 3;
+        *current_distribution_row = ( *current_distribution_row + 1 ) % 3;
 
     }
 

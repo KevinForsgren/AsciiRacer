@@ -35,6 +35,9 @@ struct GameState
 {
     uint64_t gameTick = 0;
     double gameTime = 0;
+    int current_traffic_car;
+    int current_traffic_distribution_row;
+    int seed;
 };
 
 struct GameplaySettings
