@@ -1,6 +1,6 @@
 #include <iostream>
+#include <thread>
 #include <chrono>
-#include <bits/this_thread_sleep.h>
 #include <fstream>
 #include <filesystem>
 
@@ -11,12 +11,9 @@
 #include "header/environment.h"
 #include "header/gameSettings.h"
 
-// #if defined(_WIN32)
-// #include <windows.h>
-// #elif defined(__linux__)
-// #include <unistd.h>
-// #include <termios.h>
-// #endif
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 // TODO: place ground area materials
 
@@ -34,11 +31,15 @@ static int PlayerScore;
 
 // Handling Files
 namespace fs = std::filesystem;
-constexpr std::string FilePath = "./data.dat";
+const std::string FilePath = "./data.dat";
 
 
 int main()
 {
+ #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
     TC::new_window();
     TC::switch_raw_mode(true);
 
@@ -98,7 +99,7 @@ int main()
         previousTime = startTime;
 
         // Uncomment for getting terminal size every iteration
-        //// TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
+        TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
         // Creating a clean terminal
         TC::clear_terminal();
@@ -202,14 +203,40 @@ int main()
             // Spawning collector
             if ( game_state.gameTick % 300 == 0  && player_car.fuel < 450)
             {
-                fuel.isActive = true;
-                fuel.reset_collector(game_screen);
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const int* row[] = {
+                    ThirdRow,
+                    SecondRow,
+                    FirstRow
+                };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    {
+                        fuel.isActive = true;
+                        fuel.reset_collector(game_screen, i);
+                    }
+                }
             }
 
             if ( game_state.gameTick % 300 == 0  && player_car.tyre_health < 450)
             {
-                tyre.isActive = true;
-                tyre.reset_collector(game_screen);
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const int* row[] = {
+                    ThirdRow,
+                    SecondRow,
+                    FirstRow
+                };
+
+                for (int i = 0; i < 3; i++)
+                {
+                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    {
+                        tyre.isActive = true;
+                        tyre.reset_collector(game_screen, i);
+                    }
+                }
             }
 
 

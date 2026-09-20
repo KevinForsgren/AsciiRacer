@@ -20,7 +20,7 @@ bool Collector::collision(const Cars& player) const
     return true;
 }
 
-void Collector::reset_collector(const Screen game_screen)
+void Collector::reset_collector(const Screen game_screen, const int lane_index)
 {
     int screen_col = game_screen.Col;
     if (screen_col % 2 == 0)
@@ -29,13 +29,11 @@ void Collector::reset_collector(const Screen game_screen)
     }
 
     int spawn_x[3];
-    spawn_x[0] = (screen_col - width) / 2;
-    spawn_x[1] = spawn_x[0] + 12;
-    spawn_x[2] = spawn_x[0] - 12;
+    spawn_x[1] = (screen_col - width) / 2;
+    spawn_x[0] = spawn_x[1] - 12;
+    spawn_x[2] = spawn_x[1] + 12;
 
-    const int index = TC::random_int(0, 2);
-
-    x_position = spawn_x[index];
+    x_position = spawn_x[lane_index];
 
     // TODO:- provide y position after checking area is empty from traffic
     y_position = 5;
@@ -47,7 +45,7 @@ void Collector::manage_collector(const Screen game_screen)
 {
     if ( (y_position + height ) >= (game_screen.Row - 1)  )
     {
-        reset_collector(game_screen);
+        // reset_collector(game_screen);
         isActive = false;
 
     } else

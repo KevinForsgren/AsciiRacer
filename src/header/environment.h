@@ -1,7 +1,3 @@
-//
-// Created by kevin on 9/18/26.
-//
-
 #ifndef ASCIIRACER_ENVIRONMENT_H
 #define ASCIIRACER_ENVIRONMENT_H
 #include <string>
@@ -23,9 +19,9 @@ public:
     std::vector<std::string> collector_model;
 
     [[nodiscard]] bool collision(const Cars& player) const;
-    void reset_collector(Screen game_screen);
+    void reset_collector(Screen game_screen, int lane_index);
     void manage_collector(Screen game_screen);
-    std::string spawn_collector() const;
+    [[nodiscard]] std::string spawn_collector() const;
 
 };
 

@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #define WIN32_LEAN_AND_CLEAN
 #define VC_EXTRALEAN
 #include <windows.h>
@@ -131,7 +131,7 @@ void TerminalControl::show_cursor()
  */
 void TerminalControl::get_terminal_size(int* row, int* col)
 {
-#if defined(_WIN32)
+#ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -156,7 +156,7 @@ void TerminalControl::get_terminal_size(int* row, int* col)
  */
 bool TerminalControl::switch_raw_mode(const bool toggle)
 {
-#if defined (_WIN32)
+#ifdef _WIN32
     static DWORD originalInputMode = 0;
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 
@@ -172,15 +172,15 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
 
     if (toggle)
     {
-#if defined (_WIN32)
+#ifdef _WIN32
         DWORD rawInputMode = originalInputMode;
         rawInputMode &= ~ENABLE_LINE_INPUT;
         rawInputMode &= ~ENABLE_ECHO_INPUT;
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
 
-        // need to check this ||||
+
         // timeout for reading input from terminal
-        rawInputMode = WaitForSingleObject(hStdin, 100);
+        //DWORD waitResult = WaitForSingleObject(hStdin, 100);
 
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
@@ -219,7 +219,7 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
  */
 bool TerminalControl::read_input(char* c)
 {
-#if defined (__WIN32)
+#ifdef _WIN32
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     DWORD bytesRead;
     if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
