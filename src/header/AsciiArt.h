@@ -119,9 +119,21 @@ const std::vector<std::string> tyre_collector = {
     "╰─╯"
 };
 
-const std::string grass_1 = ".. .__.   .__ ...";
-const std::string grass_2 = " .... ... .. ....";
-const std::string grass_3 = "__ ... ....__ ...";
+inline std::vector<std::string> grass_patch = {
+    "   ⠀⠀⠀⠀⣰⡆⠀⠀ ",
+    "⠀⠀⠀⠀⠀⠀⣰⣿⠀⠀⢀ ",
+    "⠀⠀⣴⣄⠀⢰⡏⣸⠀⣴⠏ ",
+    "⠀⢠⣿⠙⣦⡟⢠⣿⣿⢏⡀ ",
+    " ⣐⣟⢹⡆⠘⡇⢸⠟⣿⡼⣿",
+    "⠉⢻⡟⠓⠀⡇⠃⢸⡟⠁⢸ ",
+    " ⠀⠀⢷⠀⠀⠀⠀⠀⠀⠀⠀"
+};
+
+inline  std::vector<std::string> grass_patch_alternative = {
+    "⠀⣄⠀⢠⣾⡏⢀⣠⣾⠆⠀⠀⠀",
+    "⢠⠀⢿⢧⣺⠉⣿⠞⣹⣏⣤⣶⡄",
+    "⠙⢿⡾⠌⠳⠀⠈⠀⠙⠁⠋⠁⠀",
+};
 
 const std::vector<std::string> stone_dotted = {
     "  ⡾⠛⢦⡀",

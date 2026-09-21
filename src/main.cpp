@@ -51,6 +51,7 @@ int main()
         .GroundSize = 17
     };
     GameState game_state{};
+    TrafficSetting traffic_setting{};
 
     //Getting Screen Properties
     TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
@@ -127,12 +128,13 @@ int main()
         else if (current_screen_mode == Pause)
         {
 
-            // Reset gameTick and gameTime to 0 for every new gameplay
+            // Reset game state and traffic state
             game_state.gameTick = 0;
             game_state.gameTime = 0;
-            game_state.current_traffic_car = 1;
-            game_state.current_traffic_distribution_row = 0;
-            game_state.seed = TC::random_int(0, 4);
+            game_state.gameSpeed = 5;
+            traffic_setting.current_traffic_car = 1;
+            traffic_setting.current_traffic_distribution_row = 0;
+            traffic_setting.seed = TC::random_int(0, 4);
 
             render::render_pause_menu(game_screen);
 
@@ -186,6 +188,10 @@ int main()
 
             std::stringstream frameBuffer;
 
+            //Grass
+            Ground grass;
+            frameBuffer << grass.manage_grass(race_track, game_screen);
+
             frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
 
             if (game_state.gameTick % 5 == 0)
@@ -202,7 +208,7 @@ int main()
             // Spawning collector
             if ( game_state.gameTick % 300 == 0  && player_car.fuel < 450)
             {
-                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.seed];
                 const int* row[] = {
                     ThirdRow,
                     SecondRow,
@@ -211,7 +217,7 @@ int main()
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    if (row[traffic_setting.current_traffic_distribution_row][i] == 0)
                     {
                         fuel.isActive = true;
                         fuel.reset_collector(game_screen, i);
@@ -221,7 +227,7 @@ int main()
 
             if ( game_state.gameTick % 300 == 0  && player_car.tyre_health < 450)
             {
-                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[game_state.seed];
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.seed];
                 const int* row[] = {
                     ThirdRow,
                     SecondRow,
@@ -230,7 +236,7 @@ int main()
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (row[game_state.current_traffic_distribution_row][i] == 0)
+                    if (row[traffic_setting.current_traffic_distribution_row][i] == 0)
                     {
                         tyre.isActive = true;
                         tyre.reset_collector(game_screen, i);
@@ -243,12 +249,14 @@ int main()
             if (fuel.isActive && fuel.collision(player_car))
             {
                 (player_car.fuel += fuel.value) >= 1000 ? player_car.fuel = 1000 : player_car.fuel += fuel.value;
+                player_car.score += 100;
                 fuel.isActive = false;
             }
 
             if (tyre.isActive && tyre.collision(player_car))
             {
                 (player_car.tyre_health += tyre.value) >= 1000 ? player_car.tyre_health = 1000 : player_car.tyre_health += tyre.value;
+                player_car.score += 100;
                 tyre.isActive = false;
             }
 
@@ -308,13 +316,29 @@ int main()
                 enemies[0]->reset_car(game_screen, 1);
             }
 
-            if (game_state.gameTick >= 100 && game_state.gameTick % 5 == 0)
+            // Increasing Game Speed over time
+            if (game_state.gameTime >= 100)
             {
-               if (game_state.current_traffic_distribution_row == 0)
+                game_state.gameSpeed = 4;
+            }
+            if (game_state.gameTime >= 160)
+            {
+                game_state.gameSpeed = 3;
+            }
+            if (game_state.gameTime >= 240)
+            {
+                game_state.gameSpeed = 2;
+            }
+
+            if (game_state.gameTick >= 100 && game_state.gameTick % game_state.gameSpeed == 0)
+            {
+                // Getting new random traffic distribution whenever current one ends
+               if (traffic_setting.current_traffic_distribution_row == 0)
                 {
-                    game_state.seed = TC::random_int(0, 4);
+                    traffic_setting.seed = TC::random_int(0, 4);
                 }
-                manage_traffic(enemies, game_screen, game_state.seed, &game_state.current_traffic_car, &game_state.current_traffic_distribution_row);
+
+                manage_traffic(enemies, game_screen, traffic_setting.seed, &traffic_setting.current_traffic_car, &traffic_setting.current_traffic_distribution_row);
             }
 
             std::cout << frameBuffer.str() << std::flush;
@@ -325,7 +349,6 @@ int main()
         {
             // Manage ScoreBoard here
             render::render_score(player_car.high_score, PlayerScore, game_screen, Message);
-
 
             char score_inpT;
 
@@ -456,17 +479,12 @@ static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const
         FirstRow
     };
 
-
-    // static int current_car = 1;
-
     const int previous_car = (*current_car + enemies_size - 1) % enemies_size;
     if (Enemies[previous_car]->y_position >= 2 * Enemies[*current_car]->height + 4)
     {
-
         spawn_traffic(Enemies, enemies_size, game_screen, current_car, row[*current_distribution_row]);
 
         *current_distribution_row = ( *current_distribution_row + 1 ) % 3;
-
     }
 
 

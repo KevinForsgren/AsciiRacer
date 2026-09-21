@@ -34,8 +34,6 @@ void Collector::reset_collector(const Screen game_screen, const int lane_index)
     spawn_x[2] = spawn_x[1] + 12;
 
     x_position = spawn_x[lane_index];
-
-    // TODO:- provide y position after checking area is empty from traffic
     y_position = 5;
 
 }
@@ -45,9 +43,7 @@ void Collector::manage_collector(const Screen game_screen)
 {
     if ( (y_position + height ) >= (game_screen.Row - 1)  )
     {
-        // reset_collector(game_screen);
         isActive = false;
-
     } else
     {
         y_position++;
@@ -66,4 +62,26 @@ std::string Collector::spawn_collector() const
 
     return collector_buffer.str();
 }
+
+std::string Ground::manage_grass(const Track track, const Screen game_screen) const
+{
+    std::stringstream grass_buffer;
+
+    // grass_buffer << TC::move_cursor(i, track.TrackStart + 2) << model[random];
+    grass_buffer << TC::move_cursor(0, track.TrackEnd - environment_objects[1].Width - (15 - environment_objects[1].Width) );
+
+    for (int i = 0; i < game_screen.Row; i++)
+    {
+        const int random = TC::random_int(0, 2);
+    }
+
+    for (int i = 0; i < game_screen.Row; i++)
+    {
+        const int random = TC::random_int(0, 2);
+    }
+
+    return grass_buffer.str();
+}
+
+
 

@@ -6,6 +6,7 @@
 #define ASCIIRACER_ENVIRONMENT_H
 #include <string>
 
+#include "AsciiArt.h"
 #include "cars.h"
 #include "gameSettings.h"
 
@@ -29,15 +30,29 @@ public:
 
 };
 
-class Grass
+struct Environment_object
 {
-
+    std::vector<std::string> Model;
+    int Height;
+    int Width;
 };
 
-class Stone
+class Ground
 {
 
+public:
+    int grass_width = 15;
+    std::vector<Environment_object> environment_objects = {
+        {grass_patch, 7, 12},
+        {grass_patch_alternative, 3, 13},
+        {stone_dotted, 3, 6},
+        {stone_dash, 3, 10}
+    };
+    // std::string model;
+
+    [[nodiscard]] std::string manage_grass(Track track, Screen game_screen) const;
 };
+
 
 
 #endif //ASCIIRACER_ENVIRONMENT_H
