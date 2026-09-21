@@ -97,6 +97,7 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
             GroundBlock block{};
             block.art = &environment_objects[i].Model;
             block.Height = environment_objects[i].Height;
+            block.Width = environment_objects[i].Width;
             block.y = current_y;
 
             belt.push_back(block);
@@ -125,7 +126,7 @@ void GroundSystem::update(const int scroll_speed = 1)
 }
 
 
-std::string GroundSystem::render(const Track& track, Screen game_screen) const
+std::string GroundSystem::render(const Track& track) const
 {
     std::stringstream screen_buffer;
 
@@ -141,10 +142,9 @@ std::string GroundSystem::render(const Track& track, Screen game_screen) const
             if (screen_y >= 0 && screen_y < screen_height)
             {
                 const std::string& art_row = (*block.art)[row];
-                const int art_len = static_cast<int>(art_row.size());
 
                 // Calculate offset to center the object within the ground area
-                int center_offset = (track.GroundSize - art_len) / 2;
+                int center_offset = (track.GroundSize - block.Width) / 2;
                 if (center_offset < 0) center_offset = 0; // Fallback if art is wider than ground
 
                 // Dynamically calculate X positions based on the center offset
@@ -153,57 +153,14 @@ std::string GroundSystem::render(const Track& track, Screen game_screen) const
                 const int right_x = track.TrackEnd - (track.GroundSize - center_offset);
 
                 // Render LEFT side
-                if (left_x >= 0 && (left_x + art_len) < game_screen.Col)
-                {
-                    screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;
-                }
+                screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;
 
                 // Render RIGHT side
-                if (right_x >= 0 && (right_x + art_len) < game_screen.Col)
-                {
-                    screen_buffer << TC::move_cursor(screen_y, right_x) << art_row;
-                }
+                screen_buffer << TC::move_cursor(screen_y, right_x) << art_row;
             }
         }
     }
     return screen_buffer.str();
 }
 
-// std::string GroundSystem::render(const Track& track, Screen game_screen) const
-// {
-//     std::stringstream screen_buffer;
-//
-//     // Calculate the two X coordinates based on the track
-//     const int left_x = track.TrackStart + 2;
-//     const int right_x = track.TrackEnd - track.GroundSize;
-//
-//     for (const auto& block : belt)
-//     {
-//         const int block_height = block.Height; // Get dynamic height
-//
-//         for (int row = 0; row < block_height; ++row)
-//         {
-//             int screen_y = block.y + row;
-//
-//             // Only draw if within vertical screen bounds
-//             if (screen_y >= 0 && screen_y < screen_height)
-//             {
-//                 const std::string& art_row = (*block.art)[row];
-//                 const int art_len = static_cast<int>(art_row.size());
-//
-//                 // Render LEFT side: Move cursor once per row and inject the whole string
-//                 if (left_x >= 0 && (left_x + art_len) < game_screen.Col)
-//                 {
-//                     screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;
-//                 }
-//
-//                 // Render RIGHT side (same logic, different X)
-//                 if (right_x >= 0 && (right_x + art_len) < game_screen.Col)
-//                 {
-//                     screen_buffer << TC::move_cursor(screen_y, right_x) << art_row;
-//                 }
-//             }
-//         }
-//     }
-//     return screen_buffer.str();
-// }
+

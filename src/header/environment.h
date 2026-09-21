@@ -45,6 +45,7 @@ struct GroundBlock {
     int y;
     const std::vector<std::string>* art;
     int Height;
+    int Width;
 };
 
 class GroundSystem
@@ -58,7 +59,7 @@ private:
 public:
     GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
     void update(int scroll_speed);
-    std::string render(const Track& track, Screen game_screen) const;
+    std::string render(const Track& track) const;
 
 
 };

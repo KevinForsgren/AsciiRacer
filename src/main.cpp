@@ -197,11 +197,12 @@ int main()
             std::stringstream frameBuffer;
 
             // Printing and Managing track ground
-            if (game_state.GameTick % 3 == 0)
+            if (game_state.GameTick % 2 == 0)
             {
-                ground_system.update(1); // Move ground down by 1 unit
+                // Move ground down by 1 unit
+                ground_system.update(1);
             }
-            frameBuffer << ground_system.render(race_track, game_screen);
+            frameBuffer << ground_system.render(race_track);
 
 
             frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
