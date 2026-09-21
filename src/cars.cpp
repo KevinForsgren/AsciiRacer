@@ -18,12 +18,12 @@ using TC = TerminalControl;
  */
 Cars::Cars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color)
 {
-    tyre_health = 1000;
-    fuel = 1000;
-    chassis_health = 1000;
-    score = 0;
+    this->TyreHealth = 1000;
+    this->Fuel = 1000;
+    this->ChassisHealth = 1000;
+    this->Score = 0;
 
-    car_model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
+    this->Model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }
 
 
@@ -33,7 +33,7 @@ Cars::Cars(const std::string& base_color, const std::string& bumper_color, const
  */
 void Cars::move_left(const int steps)
 {
-    x_position -= steps;
+    this->xPosition -= steps;
 }
 
 
@@ -43,7 +43,7 @@ void Cars::move_left(const int steps)
  */
 void Cars::move_right(const int steps)
 {
-    x_position += steps;
+    this->xPosition += steps;
 }
 
 
@@ -63,18 +63,18 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position)
     }
 
     int spawn_x[3];
-    spawn_x[0] = (screen_col - width) / 2;
+    spawn_x[0] = (screen_col - this->Width) / 2;
     spawn_x[1] = spawn_x[0] + 12;
     spawn_x[2] = spawn_x[0] - 12;
 
     const int index = TC::random_int(0, 2);
-    x_position = spawn_x[index];
-    y_position = car_y_position;
+    this->xPosition = spawn_x[index];
+    this->yPosition = car_y_position;
 
-    fuel = 1000;
-    chassis_health = 1000;
-    tyre_health = 1000;
-    score = 0;
+    this->Fuel = 1000;
+    this->ChassisHealth = 1000;
+    this->TyreHealth = 1000;
+    this->Score = 0;
 
 }
 
@@ -88,17 +88,17 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position, const i
     }
 
     int spawn_x[3];
-    spawn_x[1] = (screen_col - width) / 2;
+    spawn_x[1] = (screen_col - this->Width) / 2;
     spawn_x[0] = spawn_x[1] - 12;
     spawn_x[2] = spawn_x[1] + 12;
 
-    x_position = spawn_x[lane_index];
-    y_position = car_y_position;
+    this->xPosition = spawn_x[lane_index];
+    this->yPosition = car_y_position;
 
-    fuel = 1000;
-    chassis_health = 1000;
-    tyre_health = 1000;
-    score = 0;
+    this->Fuel = 1000;
+    this->ChassisHealth = 1000;
+    this->TyreHealth = 1000;
+    this->Score = 0;
 
 }
 
@@ -106,21 +106,21 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position, const i
 EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color, const int id) :
     Cars(base_color, bumper_color, tyre_color)
 {
-    enemy_id = id;
+    this->EnemyId = id;
 }
 
 
 bool EnemyCars::collision(const int player_x, const int player_y) const
 {
     // Player is either on the Right || Left
-    if ((x_position + width) < player_x || ( player_x + width ) < x_position  )
+    if ((this->xPosition + this->Width) < player_x || ( player_x + this->Width ) < this->xPosition  )
     {
         return false;
     }
 
 
     // Player is either on Top || Bottom
-    if ((y_position) > ( player_y + height ) || player_y > ( y_position + height ) )
+    if ((this->yPosition) > ( player_y + this->Height ) || player_y > ( this->yPosition + this->Height ) )
     {
         return false;
     }
@@ -132,7 +132,7 @@ bool EnemyCars::collision(const int player_x, const int player_y) const
 void EnemyCars::update_car_model(const std::string& base_color, const std::string& bumper_color,
     const std::string& tyre_color)
 {
-    car_model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
+    this->Model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }
 
 

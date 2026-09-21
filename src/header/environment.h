@@ -15,13 +15,13 @@ class Collector
 {
 
 public:
-    int value = 150;
-    int height = 3;
-    int width = 3;
-    int x_position{};
-    int y_position{};
+    int Value = 150;
+    int Height = 3;
+    int Width = 3;
+    int xPosition{};
+    int yPosition{};
     bool isActive = false;
-    std::vector<std::string> collector_model;
+    std::vector<std::string> Model;
 
     [[nodiscard]] bool collision(const Cars& player) const;
     void reset_collector(Screen game_screen, int lane_index);
@@ -30,29 +30,38 @@ public:
 
 };
 
-struct Environment_object
+
+struct EnvironmentObject
 {
     std::vector<std::string> Model;
     int Height;
     int Width;
 };
 
-class Ground
-{
 
-public:
-    int grass_width = 15;
-    std::vector<Environment_object> environment_objects = {
-        {grass_patch, 7, 12},
-        {grass_patch_alternative, 3, 13},
-        {stone_dotted, 3, 6},
-        {stone_dash, 3, 10}
-    };
-    // std::string model;
-
-    [[nodiscard]] std::string manage_grass(Track track, Screen game_screen) const;
+// A single segment of the conveyor belt
+struct GroundBlock {
+    int x;
+    int y;
+    const std::vector<std::string>* art;
+    int Height;
 };
 
+class GroundSystem
+{
+private:
+    std::vector<GroundBlock> belt;
+
+    int screen_height;
+    int total_belt_height;
+
+public:
+    GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
+    void update(int scroll_speed);
+    std::string render(const Track& track, Screen game_screen) const;
+
+
+};
 
 
 #endif //ASCIIRACER_ENVIRONMENT_H

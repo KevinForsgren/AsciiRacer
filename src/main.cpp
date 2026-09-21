@@ -58,28 +58,36 @@ int main()
 
     // Initializing Player Car
     Cars player_car{TC::tc_color(35,125,235), TC::tc_color(225,215,65), TC::tc_color(220,220,225)};
-    player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+    player_car.reset_car(game_screen, game_screen.Row - player_car.Height - 1);
 
-    handle_high_score(&player_car.high_score, false, FilePath);
+    handle_high_score(&player_car.HighScore, false, FilePath);
 
+    // Ground object
+    std::vector<EnvironmentObject> environment_objects = {
+        {.Model = grass_patch, .Height = 7, .Width = 12},
+        {.Model = grass_patch_alternative, .Height = 3, .Width = 13},
+        {.Model = stone_dotted, .Height = 3, .Width = 6},
+        {.Model = stone_dash, .Height = 3, .Width = 10}
+    };
+    GroundSystem ground_system(game_screen, (environment_objects.data()));
 
     // Collectors
     Collector fuel{};
     Collector tyre{};
-    fuel.collector_model = fuel_collector;
-    tyre.collector_model = tyre_collector;
+    fuel.Model = fuel_collector;
+    tyre.Model = tyre_collector;
 
-    //Making enemy cars
+    //Initializing all enemy cars
     EnemyCars* enemies[5];
 
     const int rand_1 = TC::random_int(0, 5);
     const int rand_2 = TC::random_int(0, 5);
 
-    EnemyCars enemy1{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 100};
-    EnemyCars enemy2{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 200};
-    EnemyCars enemy3{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 300};
-    EnemyCars enemy4{car_designs[rand_2].body, car_designs[rand_2].bumper, car_designs[rand_2].tyre, 400};
-    EnemyCars enemy5{car_designs[rand_1].body, car_designs[rand_1].bumper, car_designs[rand_1].tyre, 500};
+    EnemyCars enemy1{car_designs[rand_1].Body, car_designs[rand_1].Bumper, car_designs[rand_1].Tyre, 100};
+    EnemyCars enemy2{car_designs[rand_2].Body, car_designs[rand_2].Bumper, car_designs[rand_2].Tyre, 200};
+    EnemyCars enemy3{car_designs[rand_1].Body, car_designs[rand_1].Bumper, car_designs[rand_1].Tyre, 300};
+    EnemyCars enemy4{car_designs[rand_2].Body, car_designs[rand_2].Bumper, car_designs[rand_2].Tyre, 400};
+    EnemyCars enemy5{car_designs[rand_1].Body, car_designs[rand_1].Bumper, car_designs[rand_1].Tyre, 500};
 
     enemies[0] = &enemy1;
     enemies[1] = &enemy2;
@@ -87,7 +95,7 @@ int main()
     enemies[3] = &enemy4;
     enemies[4] = &enemy5;
 
-    // Initialize inGames time and tick
+    // Initialize inGame time
     auto previousTime = Clock::now();
 
     while (true)
@@ -95,7 +103,7 @@ int main()
         // Managing clocks and game fps
         auto startTime = Clock::now();
         const double deltaTime = std::chrono::duration<double>(startTime - previousTime).count();
-        game_state.gameTime += deltaTime;
+        game_state.GameTime += deltaTime;
         previousTime = startTime;
 
         // Uncomment for getting terminal size every iteration
@@ -129,12 +137,12 @@ int main()
         {
 
             // Reset game state and traffic state
-            game_state.gameTick = 0;
-            game_state.gameTime = 0;
-            game_state.gameSpeed = 5;
-            traffic_setting.current_traffic_car = 1;
-            traffic_setting.current_traffic_distribution_row = 0;
-            traffic_setting.seed = TC::random_int(0, 4);
+            game_state.GameTick = 0;
+            game_state.GameTime = 0;
+            game_state.GameSpeed = 5;
+            traffic_setting.CurrentTrafficCar = 1;
+            traffic_setting.CurrentTrafficDistributionRow = 0;
+            traffic_setting.Seed = TC::random_int(0, 4);
 
             render::render_pause_menu(game_screen);
 
@@ -143,26 +151,26 @@ int main()
             {
                 if (pause_inpT == 'e' || pause_inpT == 'E')
                 {
-                    gameplay_settings.steps = 12;
-                    gameplay_settings.fuel_degradation = 11;
-                    gameplay_settings.tyre_degradation = 7;
-                    gameplay_settings.chassis_degradation = 5;
+                    gameplay_settings.Steps = 12;
+                    gameplay_settings.FuelDegradation = 11;
+                    gameplay_settings.TyreDegradation = 7;
+                    gameplay_settings.ChassisDegradation = 5;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'm' || pause_inpT == 'M')
                 {
-                    gameplay_settings.steps = 2;
-                    gameplay_settings.fuel_degradation = 15;
-                    gameplay_settings.tyre_degradation = 10;
-                    gameplay_settings.chassis_degradation = 10;
+                    gameplay_settings.Steps = 2;
+                    gameplay_settings.FuelDegradation = 15;
+                    gameplay_settings.TyreDegradation = 10;
+                    gameplay_settings.ChassisDegradation = 10;
                     current_screen_mode = Gameplay;
                 }
                 else if (pause_inpT == 'h' || pause_inpT == 'H')
                 {
-                    gameplay_settings.steps = 1;
-                    gameplay_settings.fuel_degradation = 20;
-                    gameplay_settings.tyre_degradation = 13;
-                    gameplay_settings.chassis_degradation = 15;
+                    gameplay_settings.Steps = 1;
+                    gameplay_settings.FuelDegradation = 20;
+                    gameplay_settings.TyreDegradation = 13;
+                    gameplay_settings.ChassisDegradation = 15;
                     current_screen_mode = Gameplay;
                 }
             }
@@ -177,10 +185,10 @@ int main()
                 switch (gameplay_inpT)
                 {
                 case 'a':
-                    player_car.move_left(gameplay_settings.steps);
+                    player_car.move_left(gameplay_settings.Steps);
                     break;
                 case 'd':
-                    player_car.move_right(gameplay_settings.steps);
+                    player_car.move_right(gameplay_settings.Steps);
                     break;
                 default: break;
                 }
@@ -188,13 +196,17 @@ int main()
 
             std::stringstream frameBuffer;
 
-            //Grass
-            Ground grass;
-            frameBuffer << grass.manage_grass(race_track, game_screen);
+            // Printing and Managing track ground
+            if (game_state.GameTick % 3 == 0)
+            {
+                ground_system.update(1); // Move ground down by 1 unit
+            }
+            frameBuffer << ground_system.render(race_track, game_screen);
+
 
             frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
 
-            if (game_state.gameTick % 5 == 0)
+            if (game_state.GameTick % 5 == 0)
             {
                 if (fuel.isActive) fuel.manage_collector(game_screen);
                 if (tyre.isActive) tyre.manage_collector(game_screen);
@@ -206,9 +218,9 @@ int main()
             if (tyre.isActive) frameBuffer << tyre.spawn_collector();
 
             // Spawning collector
-            if ( game_state.gameTick % 300 == 0  && player_car.fuel < 450)
+            if ( game_state.GameTick % 300 == 0  && player_car.Fuel < 450)
             {
-                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.seed];
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.Seed];
                 const int* row[] = {
                     ThirdRow,
                     SecondRow,
@@ -217,7 +229,7 @@ int main()
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (row[traffic_setting.current_traffic_distribution_row][i] == 0)
+                    if (row[traffic_setting.CurrentTrafficDistributionRow][i] == 0)
                     {
                         fuel.isActive = true;
                         fuel.reset_collector(game_screen, i);
@@ -225,9 +237,9 @@ int main()
                 }
             }
 
-            if ( game_state.gameTick % 300 == 0  && player_car.tyre_health < 450)
+            if ( game_state.GameTick % 300 == 0  && player_car.TyreHealth < 450)
             {
-                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.seed];
+                const auto [FirstRow, SecondRow, ThirdRow] = traffic_distributions[traffic_setting.Seed];
                 const int* row[] = {
                     ThirdRow,
                     SecondRow,
@@ -236,7 +248,7 @@ int main()
 
                 for (int i = 0; i < 3; i++)
                 {
-                    if (row[traffic_setting.current_traffic_distribution_row][i] == 0)
+                    if (row[traffic_setting.CurrentTrafficDistributionRow][i] == 0)
                     {
                         tyre.isActive = true;
                         tyre.reset_collector(game_screen, i);
@@ -248,15 +260,15 @@ int main()
             // Checking collector collision with player
             if (fuel.isActive && fuel.collision(player_car))
             {
-                (player_car.fuel += fuel.value) >= 1000 ? player_car.fuel = 1000 : player_car.fuel += fuel.value;
-                player_car.score += 100;
+                (player_car.Fuel += fuel.Value) >= 1000 ? player_car.Fuel = 1000 : player_car.Fuel += fuel.Value;
+                player_car.Score += 100;
                 fuel.isActive = false;
             }
 
             if (tyre.isActive && tyre.collision(player_car))
             {
-                (player_car.tyre_health += tyre.value) >= 1000 ? player_car.tyre_health = 1000 : player_car.tyre_health += tyre.value;
-                player_car.score += 100;
+                (player_car.TyreHealth += tyre.Value) >= 1000 ? player_car.TyreHealth = 1000 : player_car.TyreHealth += tyre.Value;
+                player_car.Score += 100;
                 tyre.isActive = false;
             }
 
@@ -265,22 +277,22 @@ int main()
             {
                 if (enemy->isActive) frameBuffer << render::print_race_car(enemy);
 
-                if (enemy->collision(player_car.x_position, player_car.y_position) && enemy->isActive) Message = "Car crashed with incoming traffic";
+                if (enemy->collision(player_car.xPosition, player_car.yPosition) && enemy->isActive) Message = "Car crashed with incoming traffic";
             }
 
             // Detecting track collision and car status
-            if (player_car.x_position <= (race_track.TrackStart + 1) || (player_car.x_position + player_car.width) >= (race_track.TrackEnd))
+            if (player_car.xPosition <= (race_track.TrackStart + 1) || (player_car.xPosition + player_car.Width) >= (race_track.TrackEnd))
             {
                 Message = "Car Collides with track";
             }
 
-            if (player_car.tyre_health <= 0 || player_car.fuel <= 0 || player_car.chassis_health <= 0)
+            if (player_car.TyreHealth <= 0 || player_car.Fuel <= 0 || player_car.ChassisHealth <= 0)
             {
-                if (player_car.tyre_health <= 0)
+                if (player_car.TyreHealth <= 0)
                 {
                     Message = "Tyre Punctured";
                 }
-                else if (player_car.chassis_health == 0)
+                else if (player_car.ChassisHealth == 0)
                 {
                     Message = "Car Chassis Destroyed";
                 }
@@ -293,62 +305,62 @@ int main()
             // Quitting game and Resetting Player and traffic
             if (!Message.empty())
             {
-                PlayerScore = player_car.score;
-                player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+                PlayerScore = player_car.Score;
+                player_car.reset_car(game_screen, game_screen.Row - player_car.Height - 1);
 
                 for (const auto& enemy: enemies)
                 {
                     enemy->isActive = false;
                 }
 
-                if (player_car.score > player_car.high_score)
+                if (player_car.Score > player_car.HighScore)
                 {
-                    player_car.high_score = player_car.score;
+                    player_car.HighScore = player_car.Score;
                 }
 
                 current_screen_mode = ScoreBoard;
             }
 
             // Activating traffic
-            if (game_state.gameTick == 80 )
+            if (game_state.GameTick == 80 )
             {
                 enemies[0]->isActive = true;
                 enemies[0]->reset_car(game_screen, 1);
             }
 
             // Increasing Game Speed over time
-            if (game_state.gameTime >= 100)
+            if (game_state.GameTime >= 100)
             {
-                game_state.gameSpeed = 4;
+                game_state.GameSpeed = 4;
             }
-            if (game_state.gameTime >= 160)
+            if (game_state.GameTime >= 160)
             {
-                game_state.gameSpeed = 3;
+                game_state.GameSpeed = 3;
             }
-            if (game_state.gameTime >= 240)
+            if (game_state.GameTime >= 240)
             {
-                game_state.gameSpeed = 2;
+                game_state.GameSpeed = 2;
             }
 
-            if (game_state.gameTick >= 100 && game_state.gameTick % game_state.gameSpeed == 0)
+            if (game_state.GameTick >= 100 && game_state.GameTick % game_state.GameSpeed == 0)
             {
                 // Getting new random traffic distribution whenever current one ends
-               if (traffic_setting.current_traffic_distribution_row == 0)
+               if (traffic_setting.CurrentTrafficDistributionRow == 0)
                 {
-                    traffic_setting.seed = TC::random_int(0, 4);
+                    traffic_setting.Seed = TC::random_int(0, 4);
                 }
 
-                manage_traffic(enemies, game_screen, traffic_setting.seed, &traffic_setting.current_traffic_car, &traffic_setting.current_traffic_distribution_row);
+                manage_traffic(enemies, game_screen, traffic_setting.Seed, &traffic_setting.CurrentTrafficCar, &traffic_setting.CurrentTrafficDistributionRow);
             }
 
             std::cout << frameBuffer.str() << std::flush;
-            game_state.gameTick++;
+            game_state.GameTick++;
 
         }
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::render_score(player_car.high_score, PlayerScore, game_screen, Message);
+            render::render_score(player_car.HighScore, PlayerScore, game_screen, Message);
 
             char score_inpT;
 
@@ -372,7 +384,7 @@ int main()
 
     }
 
-    handle_high_score(&player_car.high_score, true, FilePath);
+    handle_high_score(&player_car.HighScore, true, FilePath);
 
     // Turning terminal back to normal
     TC::switch_raw_mode(false);
@@ -458,7 +470,7 @@ static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Sc
 
             // Resetting car colors and attributes
             const int rand = TC::random_int(0, 5);
-            Enemies[*current_car]->update_car_model(car_designs[rand].body, car_designs[rand].bumper, car_designs[rand].tyre);
+            Enemies[*current_car]->update_car_model(car_designs[rand].Body, car_designs[rand].Bumper, car_designs[rand].Tyre);
 
             Enemies[*current_car]->reset_car(game_screen, 1 , i);
 
@@ -480,7 +492,7 @@ static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const
     };
 
     const int previous_car = (*current_car + enemies_size - 1) % enemies_size;
-    if (Enemies[previous_car]->y_position >= 2 * Enemies[*current_car]->height + 4)
+    if (Enemies[previous_car]->yPosition >= 2 * Enemies[*current_car]->Height + 4)
     {
         spawn_traffic(Enemies, enemies_size, game_screen, current_car, row[*current_distribution_row]);
 
@@ -491,13 +503,15 @@ static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const
     // Deactivating any cars that are out of screen;
     for (int i = 0; i < enemies_size; i++)
     {
-        if ( Enemies[i]->y_position + Enemies[i]->height >= game_screen.Row - 1 )
+        if ( Enemies[i]->yPosition + Enemies[i]->Height >= game_screen.Row - 1 )
         {
             Enemies[i]->isActive = false;
         }
         else
         {
-            if (Enemies[i]->isActive) Enemies[i]->y_position++;
+            if (Enemies[i]->isActive) Enemies[i]->yPosition++;
         }
     }
 }
+
+

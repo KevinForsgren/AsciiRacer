@@ -5,13 +5,13 @@
 bool Collector::collision(const Cars& player) const
 {
     // Player is either on the Right || Left
-    if ((x_position + width) < player.x_position || ( player.x_position + player.width ) < x_position  )
+    if ((this->xPosition + this->Width) < player.xPosition || ( player.xPosition + player.Width ) < this->xPosition  )
     {
         return false;
     }
 
     // Player is either on Top || Bottom
-    if ((y_position) > ( player.y_position + player.height ) || player.y_position > ( y_position + height ) )
+    if ((this->yPosition) > ( player.yPosition + player.Height ) || player.yPosition > ( this->yPosition + this->Height ) )
     {
         return false;
     }
@@ -29,24 +29,24 @@ void Collector::reset_collector(const Screen game_screen, const int lane_index)
     }
 
     int spawn_x[3];
-    spawn_x[1] = (screen_col - width) / 2;
+    spawn_x[1] = (screen_col - this->Width) / 2;
     spawn_x[0] = spawn_x[1] - 12;
     spawn_x[2] = spawn_x[1] + 12;
 
-    x_position = spawn_x[lane_index];
-    y_position = 5;
+    this->xPosition = spawn_x[lane_index];
+    this->yPosition = 5;
 
 }
 
 
 void Collector::manage_collector(const Screen game_screen)
 {
-    if ( (y_position + height ) >= (game_screen.Row - 1)  )
+    if ( (this->yPosition + this->Height ) >= (game_screen.Row - 1)  )
     {
-        isActive = false;
+        this->isActive = false;
     } else
     {
-        y_position++;
+        this->yPosition++;
     }
 }
 
@@ -56,32 +56,154 @@ std::string Collector::spawn_collector() const
 
     for (int i = 0; i < 3; i++)
     {
-        collector_buffer << TC::move_cursor(y_position + i, x_position);
-        collector_buffer << collector_model[i];
+        collector_buffer << TC::move_cursor(this->yPosition + i, this->xPosition);
+        collector_buffer << this->Model[i];
     }
 
     return collector_buffer.str();
 }
 
-std::string Ground::manage_grass(const Track track, const Screen game_screen) const
+GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environment_objects[])
 {
-    std::stringstream grass_buffer;
+    this->screen_height = game_screen.Row;
+    int pattern_height = 0;
+    constexpr int VerticalSpacing = 3;
 
-    // grass_buffer << TC::move_cursor(i, track.TrackStart + 2) << model[random];
-    grass_buffer << TC::move_cursor(0, track.TrackEnd - environment_objects[1].Width - (15 - environment_objects[1].Width) );
-
-    for (int i = 0; i < game_screen.Row; i++)
+    for (int i = 0; i < 4; i++)
     {
-        const int random = TC::random_int(0, 2);
+        pattern_height += environment_objects[i].Height + VerticalSpacing;
     }
 
-    for (int i = 0; i < game_screen.Row; i++)
-    {
-        const int random = TC::random_int(0, 2);
+
+    // Calculate how many blocks we need to cover the screen.
+    // Adding 2 to handle partial scrolling off-screen at the top and bottom.
+    int num_blocks = (screen_height / pattern_height) + 2;
+
+    // To keep an alternating pattern perfectly looping, the total number of blocks MUST be even.
+    if (num_blocks % 2 != 0) {
+        num_blocks++;
     }
 
-    return grass_buffer.str();
+    total_belt_height = num_blocks * pattern_height;
+
+
+    // 4. Initialize the single belt buffer
+    int current_y = -pattern_height; // Start one full pattern above the screen FIXME
+
+    for (int p = 0; p < num_blocks; ++p)
+    {
+        for (int i = 0; i < 4; ++i)
+        { // Sequentially add 1, 2, 3, 4
+            GroundBlock block{};
+            block.art = &environment_objects[i].Model;
+            block.Height = environment_objects[i].Height;
+            block.y = current_y;
+
+            belt.push_back(block);
+
+            // Increment Y by this specific block's height to handle variable sizes
+            current_y += block.Height + VerticalSpacing;
+        }
+    }
 }
 
 
+void GroundSystem::update(const int scroll_speed = 1)
+{
+    for (auto& block : belt)
+    {
+        block.y += scroll_speed;
 
+        // Recycle: if the block moves completely off the bottom
+        if (block.y >= screen_height)
+        {
+            // Teleport to the top exactly as before.
+            // This still works perfectly because total_belt_height is the exact sum of all varying heights.
+            block.y -= total_belt_height;
+        }
+    }
+}
+
+
+std::string GroundSystem::render(const Track& track, Screen game_screen) const
+{
+    std::stringstream screen_buffer;
+
+    for (const auto& block : belt)
+    {
+        const int block_height = block.Height;
+
+        for (int row = 0; row < block_height; ++row)
+        {
+            int screen_y = block.y + row;
+
+            // Only draw if within vertical screen bounds
+            if (screen_y >= 0 && screen_y < screen_height)
+            {
+                const std::string& art_row = (*block.art)[row];
+                const int art_len = static_cast<int>(art_row.size());
+
+                // Calculate offset to center the object within the ground area
+                int center_offset = (track.GroundSize - art_len) / 2;
+                if (center_offset < 0) center_offset = 0; // Fallback if art is wider than ground
+
+                // Dynamically calculate X positions based on the center offset
+                // (Assumes Left Ground is to the left of TrackStart, Right Ground is right of TrackEnd)
+                const int left_x = (track.TrackStart + 2) + center_offset;
+                const int right_x = track.TrackEnd - (track.GroundSize - center_offset);
+
+                // Render LEFT side
+                if (left_x >= 0 && (left_x + art_len) < game_screen.Col)
+                {
+                    screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;
+                }
+
+                // Render RIGHT side
+                if (right_x >= 0 && (right_x + art_len) < game_screen.Col)
+                {
+                    screen_buffer << TC::move_cursor(screen_y, right_x) << art_row;
+                }
+            }
+        }
+    }
+    return screen_buffer.str();
+}
+
+// std::string GroundSystem::render(const Track& track, Screen game_screen) const
+// {
+//     std::stringstream screen_buffer;
+//
+//     // Calculate the two X coordinates based on the track
+//     const int left_x = track.TrackStart + 2;
+//     const int right_x = track.TrackEnd - track.GroundSize;
+//
+//     for (const auto& block : belt)
+//     {
+//         const int block_height = block.Height; // Get dynamic height
+//
+//         for (int row = 0; row < block_height; ++row)
+//         {
+//             int screen_y = block.y + row;
+//
+//             // Only draw if within vertical screen bounds
+//             if (screen_y >= 0 && screen_y < screen_height)
+//             {
+//                 const std::string& art_row = (*block.art)[row];
+//                 const int art_len = static_cast<int>(art_row.size());
+//
+//                 // Render LEFT side: Move cursor once per row and inject the whole string
+//                 if (left_x >= 0 && (left_x + art_len) < game_screen.Col)
+//                 {
+//                     screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;
+//                 }
+//
+//                 // Render RIGHT side (same logic, different X)
+//                 if (right_x >= 0 && (right_x + art_len) < game_screen.Col)
+//                 {
+//                     screen_buffer << TC::move_cursor(screen_y, right_x) << art_row;
+//                 }
+//             }
+//         }
+//     }
+//     return screen_buffer.str();
+// }

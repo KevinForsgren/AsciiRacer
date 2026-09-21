@@ -11,9 +11,9 @@
 
 struct Car_Design
 {
-    std::string body;
-    std::string bumper;
-    std::string tyre;
+    std::string Body;
+    std::string Bumper;
+    std::string Tyre;
 };
 
 struct Traffic_Distribution
@@ -34,17 +34,17 @@ inline std::vector<Traffic_Distribution> traffic_distributions = {
 class Cars
 {
 public:
-    int velocity{};
-    int x_position{};
-    int y_position{};
-    mutable int high_score{};
-    std::vector<std::string> car_model;
-    int score;
-    int tyre_health;
-    int fuel;
-    int chassis_health;
-    const int height = 7;
-    const int width = 9;
+    int Velocity{};
+    int xPosition{};
+    int yPosition{};
+    mutable int HighScore{};
+    std::vector<std::string> Model;
+    int Score;
+    int TyreHealth;
+    int Fuel;
+    int ChassisHealth;
+    const int Height = 7;
+    const int Width = 9;
 
     Cars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
     void move_left(int steps);
@@ -57,7 +57,7 @@ class EnemyCars: public Cars
 {
 public:
     bool isActive = false;
-    int enemy_id;
+    int EnemyId;
     EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color, int id);
     bool collision(int player_x, int player_y) const;
     void update_car_model(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color);
