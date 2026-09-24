@@ -40,6 +40,7 @@ int main()
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 #endif
+
     TC::new_window();
     TC::switch_raw_mode(true);
 
@@ -108,8 +109,8 @@ int main()
         if (current_screen_mode == MainMenu)
         {
             // Managing Game's main menu
-            render::render_main_menu(game_screen.Row, game_screen.Col);
-
+            std::cout << render::render_main_menu(game_screen.Row, game_screen.Col) << std::flush;
+            
             char home_inpT;
             if (TC::read_input(&home_inpT))
             {
@@ -123,19 +124,19 @@ int main()
                 }
 
                 if (home_inpT == 'q' || home_inpT == 'Q') break;
-            }
+            }      
         }
         else if (current_screen_mode == Pause)
         {
 
-            // Reset gameTick and gameTime to 0 for every new gameplay
+            // Reset gameTick and gameTime for every new gameplay
             game_state.gameTick = 0;
             game_state.gameTime = 0;
             game_state.current_traffic_car = 1;
             game_state.current_traffic_distribution_row = 0;
             game_state.seed = TC::random_int(0, 4);
 
-            render::render_pause_menu(game_screen);
+            std::cout << render::render_pause_menu(game_screen) << std::flush;
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -165,10 +166,10 @@ int main()
                     current_screen_mode = Gameplay;
                 }
             }
-
         }
         else if (current_screen_mode == Gameplay)
         {
+            std::stringstream frameBuffer;
 
             char gameplay_inpT;
             if (TC::read_input(&gameplay_inpT))
@@ -184,8 +185,6 @@ int main()
                 default: break;
                 }
             }
-
-            std::stringstream frameBuffer;
 
             frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);
 
@@ -325,9 +324,8 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::render_score(player_car.high_score, PlayerScore, game_screen, Message);
-
-
+            std::cout << render::render_score(player_car.high_score, PlayerScore, game_screen, Message) << std::flush;
+            
             char score_inpT;
 
             if (TC::read_input(&score_inpT))
@@ -337,8 +335,7 @@ int main()
                     current_screen_mode = MainMenu;
                     Message.clear();
                 }
-            }
-
+            }            
         }
 
 

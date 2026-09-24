@@ -135,8 +135,8 @@ void TerminalControl::get_terminal_size(int* row, int* col)
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    *row = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
-    *col = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+    *col = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1); // Width (Columns)
+    *row = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1); // Height (Rows)
 
 #elif defined(__linux__)
     winsize w{};
@@ -178,9 +178,6 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         rawInputMode &= ~ENABLE_ECHO_INPUT;
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
 
-
-        // timeout for reading input from terminal
-        //DWORD waitResult = WaitForSingleObject(hStdin, 100);
 
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
