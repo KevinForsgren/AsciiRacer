@@ -37,7 +37,7 @@ public:
     int Velocity{};
     int xPosition{};
     int yPosition{};
-    mutable int HighScore{};
+    int HighScore;
     std::vector<std::string> Model;
     int Score;
     int TyreHealth;

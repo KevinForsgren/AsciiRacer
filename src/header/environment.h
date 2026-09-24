@@ -53,7 +53,7 @@ private:
 public:
     GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
     void update(int scroll_speed);
-    std::string render(const Track& track) const;
+    [[nodiscard]] std::string render(const Track& track) const;
 
 
 };

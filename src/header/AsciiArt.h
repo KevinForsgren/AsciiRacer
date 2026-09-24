@@ -106,7 +106,6 @@ inline const std::string block_full = "█";
 inline const std::string non_block_full = "░";
 inline const std::string block_lower = "▄";
 
-
 const std::vector<std::string> fuel_collector = {
     "╭─╮",
     "│F│",
@@ -146,12 +145,6 @@ const std::vector<std::string> stone_dash = {
     "( ,'     )",
     " '-___-_+'"
 };
-
-// const std::vector<std::string> wooden_log = {
-//     R"(_ __\ \_____,)",
-//     "[_[___>⌢<___#"
-// };
-
 
 static std::vector<Car_Design> car_designs = {
     {.Body = TC::tc_color(220, 40, 55), .Bumper = TC::tc_color(245, 245, 245), .Tyre = TC::tc_color(190, 190, 190)},
