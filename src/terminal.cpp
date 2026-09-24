@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#if defined(_WIN32)
+#ifdef _WIN32
 #define WIN32_LEAN_AND_CLEAN
 #define VC_EXTRALEAN
 #include <windows.h>
@@ -131,12 +131,12 @@ void TerminalControl::show_cursor()
  */
 void TerminalControl::get_terminal_size(int* row, int* col)
 {
-#if defined(_WIN32)
+#ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    *row = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1);
-    *col = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+    *col = (int)(csbi.srWindow.Right - csbi.srWindow.Left + 1); // Width (Columns)
+    *row = (int)(csbi.srWindow.Bottom - csbi.srWindow.Top + 1); // Height (Rows)
 
 #elif defined(__linux__)
     winsize w{};
@@ -156,7 +156,7 @@ void TerminalControl::get_terminal_size(int* row, int* col)
  */
 bool TerminalControl::switch_raw_mode(const bool toggle)
 {
-#if defined (_WIN32)
+#ifdef _WIN32
     static DWORD originalInputMode = 0;
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 
@@ -172,15 +172,13 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
 
     if (toggle)
     {
-#if defined (_WIN32)
+#ifdef _WIN32
         DWORD rawInputMode = originalInputMode;
         rawInputMode &= ~ENABLE_LINE_INPUT;
         rawInputMode &= ~ENABLE_ECHO_INPUT;
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
 
-        // need to check this ||||
-        // timeout for reading input from terminal
-        rawInputMode = WaitForSingleObject(hStdin, 100);
+
 
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
@@ -219,14 +217,43 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
  */
 bool TerminalControl::read_input(char* c)
 {
-#if defined (__WIN32)
-    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD bytesRead;
-    if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
-    {
-        return true;
-    }
+#ifdef _WIN32
+    //HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    //DWORD bytesRead;
+    //if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
+    //{
+    //    return true;
+    //}
 
+    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD events = 0;
+
+    // Check if there are any events waiting in the input buffer
+    GetNumberOfConsoleInputEvents(hInput, &events);
+
+    while (events > 0)
+    {
+        INPUT_RECORD ir;
+        DWORD read;
+
+        // Read and remove the event from the buffer
+        ReadConsoleInput(hInput, &ir, 1, &read);
+
+        // Ensure the event is a Key Press (not a release) and contains an actual character
+        if (ir.EventType == KEY_EVENT && ir.Event.KeyEvent.bKeyDown)
+        {
+            char asciiChar = ir.Event.KeyEvent.uChar.AsciiChar;
+            if (asciiChar != 0)
+            {
+                *c = asciiChar;
+                return true; // Valid key found, return immediately
+            }
+        }
+
+        // If it was a mouse movement or a modifier key (like Shift), 
+        // the loop continues and checks the next event.
+        GetNumberOfConsoleInputEvents(hInput, &events);
+    }
 #elif defined(__linux__)
     // return true if i byte is read
     if (read(STDIN_FILENO, c, 1) == 1)

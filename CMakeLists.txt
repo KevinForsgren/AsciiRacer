@@ -16,3 +16,7 @@ add_executable(AsciiRacer src/main.cpp
         src/environment.cpp
         src/header/environment.h
 )
+
+if (MSVC)
+add_compile_options(/utf-8)
+endif()

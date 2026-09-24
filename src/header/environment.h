@@ -1,7 +1,3 @@
-//
-// Created by kevin on 9/18/26.
-//
-
 #ifndef ASCIIRACER_ENVIRONMENT_H
 #define ASCIIRACER_ENVIRONMENT_H
 #include <string>

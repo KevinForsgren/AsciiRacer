@@ -102,9 +102,9 @@ inline const std::vector<std::string> upper_infotainment_screen = {
 constexpr int upper_infotainment_screen_rows = 12;
 constexpr int infotainment_screen_cols = 31;
 
-constexpr std::string block_full = "█";
-constexpr std::string non_block_full = "░";
-constexpr std::string block_lower = "▄";
+inline const std::string block_full = "█";
+inline const std::string non_block_full = "░";
+inline const std::string block_lower = "▄";
 
 
 const std::vector<std::string> fuel_collector = {

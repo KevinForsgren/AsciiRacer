@@ -22,7 +22,7 @@ using TC = TerminalControl;
  * @param row total no of terminal screen row
  * @param col total no of terminal screen col
  */
-void render::render_main_menu(const int row, const int col)
+std::string render::render_main_menu(const int row, const int col)
 {
     std::stringstream frame_buffer;
     int i = 2;
@@ -46,7 +46,7 @@ void render::render_main_menu(const int row, const int col)
         }
     }
 
-    // printing options
+    // Menu options
     i += 5;
     for (const auto& str : game_menu)
     {
@@ -60,7 +60,8 @@ void render::render_main_menu(const int row, const int col)
     frame_buffer << TC::move_cursor(i, (col - static_cast<int>(message.length())) / 2) << message <<
         std::endl;
 
-    std::cout << frame_buffer.str() << std::flush;
+    //std::cout << frame_buffer.str() << std::flush;
+    return frame_buffer.str();
 }
 
 
@@ -68,7 +69,7 @@ void render::render_main_menu(const int row, const int col)
  *
  *
  */
-void render::render_pause_menu(const Screen game_screen)
+std::string render::render_pause_menu(const Screen game_screen)
 {
     std::stringstream frame_buffer;
 
@@ -93,7 +94,7 @@ void render::render_pause_menu(const Screen game_screen)
     frame_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(message_2.length())) / 2) << message_2 <<
         std::endl;
 
-    std::cout << frame_buffer.str() << std::flush;
+    return frame_buffer.str();
 }
 
 
@@ -178,7 +179,7 @@ std::string render::render_game(Cars* player_car,
 
 
 
-void render::render_score(const int high_score, const int score, const Screen game_screen, const std::string& game_over_message)
+std::string render::render_score(const int high_score, const int score, const Screen game_screen, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
 
@@ -210,7 +211,7 @@ void render::render_score(const int high_score, const int score, const Screen ga
     score_buffer << TC::move_cursor(i, (game_screen.Col - static_cast<int>(message.length())) / 2) << message <<
          std::endl;
 
-    std::cout << score_buffer.str() << std::flush;
+    return score_buffer.str();
 }
 
 

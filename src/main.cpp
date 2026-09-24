@@ -1,6 +1,6 @@
 #include <iostream>
+#include <thread>
 #include <chrono>
-#include <bits/this_thread_sleep.h>
 #include <fstream>
 #include <filesystem>
 
@@ -11,12 +11,9 @@
 #include "header/environment.h"
 #include "header/gameSettings.h"
 
-// #if defined(_WIN32)
-// #include <windows.h>
-// #elif defined(__linux__)
-// #include <unistd.h>
-// #include <termios.h>
-// #endif
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 // TODO: place ground area materials
 
@@ -34,11 +31,16 @@ static int PlayerScore;
 
 // Handling Files
 namespace fs = std::filesystem;
-constexpr std::string FilePath = "./data.dat";
+const std::string FilePath = "./data.dat";
 
 
 int main()
 {
+ #ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
+
     TC::new_window();
     TC::switch_raw_mode(true);
 
@@ -107,17 +109,17 @@ int main()
         previousTime = startTime;
 
         // Uncomment for getting terminal size every iteration
-        //// TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
+        TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
         // Creating a clean terminal
         TC::clear_terminal();
-        TC::hide_cursor();
+        //TC::hide_cursor();
 
         if (current_screen_mode == MainMenu)
         {
             // Managing Game's main menu
-            render::render_main_menu(game_screen.Row, game_screen.Col);
-
+            std::cout << render::render_main_menu(game_screen.Row, game_screen.Col) << std::flush;
+            
             char home_inpT;
             if (TC::read_input(&home_inpT))
             {
@@ -131,20 +133,20 @@ int main()
                 }
 
                 if (home_inpT == 'q' || home_inpT == 'Q') break;
-            }
+            }      
         }
         else if (current_screen_mode == Pause)
         {
 
-            // Reset game state and traffic state
-            game_state.GameTick = 0;
-            game_state.GameTime = 0;
-            game_state.GameSpeed = 5;
-            traffic_setting.CurrentTrafficCar = 1;
-            traffic_setting.CurrentTrafficDistributionRow = 0;
-            traffic_setting.Seed = TC::random_int(0, 4);
-
-            render::render_pause_menu(game_screen);
+            // Reset Game State and Player Car for every new gameplay
+            player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
+            game_state.gameTick = 0;
+            game_state.gameTime = 0;
+            game_state.current_traffic_car = 1;
+            game_state.current_traffic_distribution_row = 0;
+            game_state.seed = TC::random_int(0, 4);
+            
+            std::cout << render::render_pause_menu(game_screen) << std::flush;
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -174,10 +176,10 @@ int main()
                     current_screen_mode = Gameplay;
                 }
             }
-
         }
         else if (current_screen_mode == Gameplay)
         {
+            std::stringstream frameBuffer;
 
             char gameplay_inpT;
             if (TC::read_input(&gameplay_inpT))
@@ -303,12 +305,11 @@ int main()
                 }
             }
 
-            // Quitting game and Resetting Player and traffic
+            // Quitting game and Resetting traffic
             if (!Message.empty())
             {
-                PlayerScore = player_car.Score;
-                player_car.reset_car(game_screen, game_screen.Row - player_car.Height - 1);
-
+                PlayerScore = player_car.score;
+                
                 for (const auto& enemy: enemies)
                 {
                     enemy->isActive = false;
@@ -361,8 +362,8 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            render::render_score(player_car.HighScore, PlayerScore, game_screen, Message);
-
+            std::cout << render::render_score(player_car.high_score, PlayerScore, game_screen, Message) << std::flush;
+            
             char score_inpT;
 
             if (TC::read_input(&score_inpT))
@@ -372,8 +373,7 @@ int main()
                     current_screen_mode = MainMenu;
                     Message.clear();
                 }
-            }
-
+            }            
         }
 
 
