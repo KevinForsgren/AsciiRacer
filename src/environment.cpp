@@ -74,7 +74,6 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
         pattern_height += environment_objects[i].Height + VerticalSpacing;
     }
 
-
     // Calculate how many blocks we need to cover the screen.
     // Adding 2 to handle partial scrolling off-screen at the top and bottom.
     int num_blocks = (screen_height / pattern_height) + 2;
@@ -141,7 +140,6 @@ std::string GroundSystem::render(const Track& track) const
             // Only draw if within vertical screen bounds
             if (screen_y >= 0 && screen_y < screen_height)
             {
-                const std::string& art_row = (*block.art)[row];
 
                 // Calculate offset to center the object within the ground area
                 int center_offset = (track.GroundSize - block.Width) / 2;
@@ -151,6 +149,8 @@ std::string GroundSystem::render(const Track& track) const
                 // (Assumes Left Ground is to the left of TrackStart, Right Ground is right of TrackEnd)
                 const int left_x = (track.TrackStart + 2) + center_offset;
                 const int right_x = track.TrackEnd - (track.GroundSize - center_offset);
+
+                const std::string& art_row = (*block.art)[row];
 
                 // Render LEFT side
                 screen_buffer << TC::move_cursor(screen_y, left_x) << art_row;

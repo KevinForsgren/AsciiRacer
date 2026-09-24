@@ -5,8 +5,6 @@
 #ifndef ASCIIRACER_ENVIRONMENT_H
 #define ASCIIRACER_ENVIRONMENT_H
 #include <string>
-
-#include "AsciiArt.h"
 #include "cars.h"
 #include "gameSettings.h"
 
