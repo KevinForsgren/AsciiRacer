@@ -179,6 +179,7 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
 
 
+
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
 #elif defined (__linux__)
@@ -217,13 +218,42 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
 bool TerminalControl::read_input(char* c)
 {
 #ifdef _WIN32
-    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-    DWORD bytesRead;
-    if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
-    {
-        return true;
-    }
+    //HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    //DWORD bytesRead;
+    //if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
+    //{
+    //    return true;
+    //}
 
+    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD events = 0;
+
+    // Check if there are any events waiting in the input buffer
+    GetNumberOfConsoleInputEvents(hInput, &events);
+
+    while (events > 0)
+    {
+        INPUT_RECORD ir;
+        DWORD read;
+
+        // Read and remove the event from the buffer
+        ReadConsoleInput(hInput, &ir, 1, &read);
+
+        // Ensure the event is a Key Press (not a release) and contains an actual character
+        if (ir.EventType == KEY_EVENT && ir.Event.KeyEvent.bKeyDown)
+        {
+            char asciiChar = ir.Event.KeyEvent.uChar.AsciiChar;
+            if (asciiChar != 0)
+            {
+                *c = asciiChar;
+                return true; // Valid key found, return immediately
+            }
+        }
+
+        // If it was a mouse movement or a modifier key (like Shift), 
+        // the loop continues and checks the next event.
+        GetNumberOfConsoleInputEvents(hInput, &events);
+    }
 #elif defined(__linux__)
     // return true if i byte is read
     if (read(STDIN_FILENO, c, 1) == 1)

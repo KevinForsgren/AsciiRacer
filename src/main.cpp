@@ -104,7 +104,7 @@ int main()
 
         // Creating a clean terminal
         TC::clear_terminal();
-        TC::hide_cursor();
+        //TC::hide_cursor();
 
         if (current_screen_mode == MainMenu)
         {
@@ -129,13 +129,14 @@ int main()
         else if (current_screen_mode == Pause)
         {
 
-            // Reset gameTick and gameTime for every new gameplay
+            // Reset Game State and Player Car for every new gameplay
+            player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
             game_state.gameTick = 0;
             game_state.gameTime = 0;
             game_state.current_traffic_car = 1;
             game_state.current_traffic_distribution_row = 0;
             game_state.seed = TC::random_int(0, 4);
-
+            
             std::cout << render::render_pause_menu(game_screen) << std::flush;
 
             char pause_inpT;
@@ -282,12 +283,11 @@ int main()
                 }
             }
 
-            // Quitting game and Resetting Player and traffic
+            // Quitting game and Resetting traffic
             if (!Message.empty())
             {
                 PlayerScore = player_car.score;
-                player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
-
+                
                 for (const auto& enemy: enemies)
                 {
                     enemy->isActive = false;
