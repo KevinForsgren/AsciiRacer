@@ -43,6 +43,7 @@ int main()
 
     TC::new_window();
     TC::switch_raw_mode(true);
+    TC::hide_cursor();
 
     // Initializing Structures;
     ScreenMode current_screen_mode = MainMenu;
@@ -113,7 +114,7 @@ int main()
 
         // Creating a clean terminal
         TC::clear_terminal();
-        //TC::hide_cursor();
+
 
         if (current_screen_mode == MainMenu)
         {
@@ -139,12 +140,12 @@ int main()
         {
 
             // Reset Game State and Player Car for every new gameplay
-            player_car.reset_car(game_screen, game_screen.Row - player_car.height - 1);
-            game_state.gameTick = 0;
-            game_state.gameTime = 0;
-            game_state.current_traffic_car = 1;
-            game_state.current_traffic_distribution_row = 0;
-            game_state.seed = TC::random_int(0, 4);
+            player_car.reset_car(game_screen, game_screen.Row - player_car.Height - 1);
+            game_state.GameTick = 0;
+            game_state.GameTime = 0;
+            traffic_setting.CurrentTrafficCar = 1;
+            traffic_setting.CurrentTrafficDistributionRow = 0;
+            traffic_setting.Seed = TC::random_int(0, 4);
             
             std::cout << render::render_pause_menu(game_screen) << std::flush;
 
@@ -196,10 +197,8 @@ int main()
                 }
             }
 
-            std::stringstream frameBuffer;
-
             // Printing and Managing track ground
-            if (game_state.GameTick % 2 == 0)
+            if (game_state.GameTick % 3 == 0)
             {
                 // Move ground down by 1 unit
                 ground_system.update(1);
@@ -308,16 +307,17 @@ int main()
             // Quitting game and Resetting traffic
             if (!Message.empty())
             {
-                PlayerScore = player_car.score;
+                PlayerScore = player_car.Score;
                 
-                for (const auto& enemy: enemies)
-                {
-                    enemy->isActive = false;
-                }
-
                 if (player_car.Score > player_car.HighScore)
                 {
                     player_car.HighScore = player_car.Score;
+                }
+
+
+                for (const auto& enemy: enemies)
+                {
+                    enemy->isActive = false;
                 }
 
                 current_screen_mode = ScoreBoard;
@@ -362,7 +362,7 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            std::cout << render::render_score(player_car.high_score, PlayerScore, game_screen, Message) << std::flush;
+            std::cout << render::render_score(player_car.HighScore, PlayerScore, game_screen, Message) << std::flush;
             
             char score_inpT;
 

@@ -11,7 +11,7 @@
 #include "header/terminal.h"
 
 static std::string print_infotainment_screen(int screen_row, int screen_col, int track_end, int second, const Cars* player_car);
-static std::string print_meter(int current_capacity, int max_capacity);
+static std::string print_meter(int current_capacity, int max_capacity = 1'000);
 
 // Aliases
 using TC = TerminalControl;
