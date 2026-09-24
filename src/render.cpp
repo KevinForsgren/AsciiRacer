@@ -145,34 +145,34 @@ std::string render::render_game(Cars* player_car,
     frame_buffer << TC::move_cursor(game_screen.Row - 1, race_track->TrackEnd + (game_screen.Col - race_track->TrackEnd - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
-    frame_buffer << print_infotainment_screen(game_screen.Row, game_screen.Col, race_track->TrackEnd, static_cast<int>(game_state->gameTime), player_car);
+    frame_buffer << print_infotainment_screen(game_screen.Row, game_screen.Col, race_track->TrackEnd, static_cast<int>(game_state->GameTime), player_car);
 
     // Drawing player car
     frame_buffer << print_race_car(player_car);
 
 
     // Decrement player car fuel and tyre health
-    if (static_cast<int>(game_state->gameTick) % 60 == 0)
+    if (static_cast<int>(game_state->GameTick) % 60 == 0)
     {
-        player_car->tyre_health -=  gameplay_settings.tyre_degradation;
-        player_car->fuel -= gameplay_settings.fuel_degradation;
+        player_car->TyreHealth -=  gameplay_settings.TyreDegradation;
+        player_car->Fuel -= gameplay_settings.FuelDegradation;
 
     }
 
     // Decrement player car tyre and chassis health when driving on ground
-    if (static_cast<int>(game_state->gameTick) % 10 == 0)
+    if (static_cast<int>(game_state->GameTick) % 10 == 0)
     {
-        if (player_car->x_position >= (race_track->TrackEnd - race_track->GroundSize) || player_car->x_position <= (race_track->TrackStart + race_track->GroundSize))
+        if (player_car->xPosition >= (race_track->TrackEnd - race_track->GroundSize) || player_car->xPosition <= (race_track->TrackStart + race_track->GroundSize))
         {
-            player_car->tyre_health -= gameplay_settings.tyre_degradation;
-            player_car->chassis_health -= gameplay_settings.chassis_degradation;
+            player_car->TyreHealth -= gameplay_settings.TyreDegradation;
+            player_car->ChassisHealth -= gameplay_settings.ChassisDegradation;
         }
     }
 
 
     // Increment player score
     // need to implement reward collecting score increment
-    player_car->score = static_cast<int>(game_state->gameTick * 0.25);
+    player_car->Score = static_cast<int>(game_state->GameTick * 0.25);
 
     return frame_buffer.str();
 }
@@ -225,9 +225,9 @@ std::string render::print_race_car(const Cars* car)
     std::stringstream car_buffer;
 
     int a = 0;
-    for (const auto& str : car->car_model)
+    for (const auto& str : car->Model)
     {
-        car_buffer << TC::move_cursor(car->y_position + a, car->x_position);
+        car_buffer << TC::move_cursor(car->yPosition + a, car->xPosition);
 
         car_buffer << str;
         car_buffer << std::endl;
@@ -262,17 +262,17 @@ static std::string print_infotainment_screen(const int screen_row, const int scr
             if (i == 4)
             {
                 screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Chassis   ";
-                screen_buffer << print_meter(player_car->chassis_health, 1000);
+                screen_buffer << print_meter(player_car->ChassisHealth, 1000);
             }
             else if (i == 6)
             {
                 screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Tyre      ";
-                screen_buffer << print_meter(player_car->tyre_health, 1000);
+                screen_buffer << print_meter(player_car->TyreHealth, 1000);
             }
             else
             {
                 screen_buffer << TC::move_cursor(screen_start_row + i, screen_start_col) << "│   Fuel      ";
-                screen_buffer << print_meter(player_car->fuel, 1000);
+                screen_buffer << print_meter(player_car->Fuel, 1000);
             }
 
 
@@ -310,10 +310,10 @@ static std::string print_infotainment_screen(const int screen_row, const int scr
             int variable_digit;
             if (i == 8)
             {
-                variable_digit = player_car->score;
+                variable_digit = player_car->Score;
             } else
             {
-                variable_digit = player_car->high_score;
+                variable_digit = player_car->HighScore;
             }
 
             screen_buffer << TC::move_cursor(screen_start_row + i,screen_start_col) << "│   " << variable_digit;

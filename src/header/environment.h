@@ -1,7 +1,6 @@
 #ifndef ASCIIRACER_ENVIRONMENT_H
 #define ASCIIRACER_ENVIRONMENT_H
 #include <string>
-
 #include "cars.h"
 #include "gameSettings.h"
 
@@ -10,13 +9,13 @@ class Collector
 {
 
 public:
-    int value = 150;
-    int height = 3;
-    int width = 3;
-    int x_position{};
-    int y_position{};
+    int Value = 150;
+    int Height = 3;
+    int Width = 3;
+    int xPosition{};
+    int yPosition{};
     bool isActive = false;
-    std::vector<std::string> collector_model;
+    std::vector<std::string> Model;
 
     [[nodiscard]] bool collision(const Cars& player) const;
     void reset_collector(Screen game_screen, int lane_index);
@@ -25,13 +24,37 @@ public:
 
 };
 
-class Grass
-{
 
+struct EnvironmentObject
+{
+    std::vector<std::string> Model;
+    int Height;
+    int Width;
 };
 
-class Stone
+
+// A single segment of the conveyor belt
+struct GroundBlock {
+    int x;
+    int y;
+    const std::vector<std::string>* art;
+    int Height;
+    int Width;
+};
+
+class GroundSystem
 {
+private:
+    std::vector<GroundBlock> belt;
+
+    int screen_height;
+    int total_belt_height;
+
+public:
+    GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
+    void update(int scroll_speed);
+    std::string render(const Track& track) const;
+
 
 };
 

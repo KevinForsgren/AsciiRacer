@@ -33,19 +33,24 @@ struct Track
 
 struct GameState
 {
-    uint64_t gameTick = 0;
-    double gameTime = 0;
-    int current_traffic_car{};
-    int current_traffic_distribution_row{};
-    int seed{};
+    uint64_t GameTick = 0;
+    double GameTime = 0;
+    int GameSpeed = 5;
+};
+
+struct TrafficSetting
+{
+    int CurrentTrafficCar{};
+    int CurrentTrafficDistributionRow{};
+    int Seed{};
 };
 
 struct GameplaySettings
 {
-    int steps;
-    int fuel_degradation;
-    int chassis_degradation;
-    int tyre_degradation;
+    int Steps;
+    int FuelDegradation;
+    int ChassisDegradation;
+    int TyreDegradation;
 };
 
 #endif //ASCIIRACER_GAMESETTINGS_H
