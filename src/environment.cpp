@@ -2,6 +2,11 @@
 
 #include "header/AsciiArt.h"
 
+/**
+ * Check axis-aligned overlap between a collector and the player.
+ * @param player player car to test
+ * @return true when the object bounds overlap; otherwise false
+ */
 bool Collector::collision(const Cars& player) const
 {
     // Player is either on the Right || Left
@@ -20,6 +25,12 @@ bool Collector::collision(const Cars& player) const
     return true;
 }
 
+
+/**
+ * Place a collector at the top of a lane and leave its active state unchanged.
+ * @param game_screen terminal dimensions
+ * @param lane_index lane index in the range 0 through 2
+ */
 void Collector::reset_collector(const Screen game_screen, const int lane_index)
 {
     int screen_col = game_screen.Col;
@@ -39,6 +50,10 @@ void Collector::reset_collector(const Screen game_screen, const int lane_index)
 }
 
 
+/**
+ * Move an active collector one row toward the player.
+ * @param game_screen terminal dimensions used for deactivation
+ */
 void Collector::manage_collector(const Screen game_screen)
 {
     if ( (this->yPosition + this->Height ) >= (game_screen.Row - 1)  )
@@ -50,6 +65,11 @@ void Collector::manage_collector(const Screen game_screen)
     }
 }
 
+
+/**
+ * Render the collector's three-row model at its current position.
+ * @return terminal escape sequences and collector artwork
+ */
 std::string Collector::spawn_collector() const
 {
     std::stringstream collector_buffer;
@@ -63,6 +83,12 @@ std::string Collector::spawn_collector() const
     return collector_buffer.str();
 }
 
+
+/**
+ * Create the repeating ground-object belt used by the gameplay renderer.
+ * @param game_screen terminal dimensions
+ * @param environment_objects four environment objects forming one pattern
+ */
 GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environment_objects[])
 {
     this->screen_height = game_screen.Row;
@@ -108,6 +134,10 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
 }
 
 
+/**
+ * Move each ground block down and recycle blocks that leave the screen.
+ * @param scroll_speed number of rows to move
+ */
 void GroundSystem::update(const int scroll_speed = 1)
 {
     for (auto& block : belt)
@@ -125,6 +155,11 @@ void GroundSystem::update(const int scroll_speed = 1)
 }
 
 
+/**
+ * Render visible ground blocks on the left and right sides of the track.
+ * @param track current track geometry
+ * @return terminal escape sequences and ground artwork
+ */
 std::string GroundSystem::render(const Track& track) const
 {
     std::stringstream screen_buffer;
@@ -162,5 +197,4 @@ std::string GroundSystem::render(const Track& track) const
     }
     return screen_buffer.str();
 }
-
 

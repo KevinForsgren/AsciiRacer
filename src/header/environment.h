@@ -17,9 +17,13 @@ public:
     bool isActive = false;
     std::vector<std::string> Model;
 
+    /** Return whether the collector overlaps the player's rectangular bounds. */
     [[nodiscard]] bool collision(const Cars& player) const;
+    /** Place the collector at the top of the requested lane. */
     void reset_collector(Screen game_screen, int lane_index);
+    /** Move the collector down one row or deactivate it at the screen edge. */
     void manage_collector(Screen game_screen);
+    /** Render the collector at its current position. */
     [[nodiscard]] std::string spawn_collector() const;
 
 };
@@ -51,8 +55,11 @@ private:
     int total_belt_height;
 
 public:
+    /** Build a scrolling ground belt from four repeating environment objects. */
     GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
+    /** Move all ground blocks down and recycle blocks beyond the screen. */
     void update(int scroll_speed);
+    /** Render visible ground objects on both sides of the track. */
     [[nodiscard]] std::string render(const Track& track) const;
 
 

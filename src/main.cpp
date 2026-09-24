@@ -17,9 +17,11 @@
 
 // TODO: place ground area materials
 
+/** Activate enemy cars for the occupied lanes in one traffic-pattern row. */
 static void spawn_traffic(EnemyCars* Enemies[], int enemies_size, Screen game_screen, int* current_car, const int traffic_distribution_row[]);
+/** Advance active traffic and spawn the next pattern row when appropriate. */
 static void manage_traffic(EnemyCars* Enemies[], Screen game_screen, int seed, int* current_car, int* current_distribution_row, int enemies_size = 5);
-
+/** Read or persist the binary high-score value. */
 static bool handle_high_score(int* high_score, bool write_mode = false, const std::string& file_path = "data.dat");
 
 // Handling Clock
@@ -34,6 +36,10 @@ namespace fs = std::filesystem;
 const std::string FilePath = "./data.dat";
 
 
+/**
+ * Initialize terminal state and run the menu, gameplay, and scoreboard loop.
+ * @return zero after restoring the terminal
+ */
 int main()
 {
  #ifdef _WIN32
@@ -396,6 +402,13 @@ int main()
 }
 
 
+/**
+ * Read or persist the binary high-score value, creating the file when needed.
+ * @param high_score value to read into or write from
+ * @param write_mode false to read, true to write
+ * @param file_path binary score-file path
+ * @return true when the requested file operation succeeds
+ */
 static bool handle_high_score(int* high_score, bool write_mode, const std::string& file_path)
 {
     // Create a consistent file path for all systems
@@ -455,6 +468,14 @@ static bool handle_high_score(int* high_score, bool write_mode, const std::strin
 }
 
 
+/**
+ * Activate enemy cars for the occupied lanes in one traffic-pattern row.
+ * @param Enemies rotating pool of enemy cars
+ * @param enemies_size number of entries in Enemies
+ * @param game_screen current terminal dimensions
+ * @param current_car index of the next reusable enemy
+ * @param traffic_distribution_row three-lane occupancy pattern
+ */
 static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Screen game_screen, int* current_car, const int traffic_distribution_row[])
 {
     for (int i = 0; i < 3; i++)
@@ -482,6 +503,15 @@ static void spawn_traffic(EnemyCars* Enemies[], const int enemies_size, const Sc
 }
 
 
+/**
+ * Advance active traffic and spawn the next row when the previous row is clear.
+ * @param Enemies rotating pool of enemy cars
+ * @param game_screen current terminal dimensions
+ * @param seed selected traffic-distribution index
+ * @param current_car index of the next reusable enemy
+ * @param current_distribution_row current pattern row
+ * @param enemies_size number of entries in Enemies
+ */
 static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const int seed, int* current_car, int* current_distribution_row, const int enemies_size)
 {
 
@@ -514,5 +544,4 @@ static void manage_traffic(EnemyCars* Enemies[], const Screen game_screen, const
         }
     }
 }
-
 

@@ -18,9 +18,10 @@ using TC = TerminalControl;
 
 
 /**
- * Prints the game's menu screen
- * @param row total no of terminal screen row
- * @param col total no of terminal screen col
+ * Render the game's main menu.
+ * @param row terminal height in rows
+ * @param col terminal width in columns
+ * @return terminal escape sequences and menu content
  */
 std::string render::render_main_menu(const int row, const int col)
 {
@@ -66,8 +67,9 @@ std::string render::render_main_menu(const int row, const int col)
 
 
 /**
- *
- *
+ * Render the difficulty-selection screen.
+ * @param game_screen terminal dimensions used to center the menu
+ * @return terminal escape sequences and menu content
  */
 std::string render::render_pause_menu(const Screen game_screen)
 {
@@ -99,12 +101,13 @@ std::string render::render_pause_menu(const Screen game_screen)
 
 
 /**
- * Prints the main racing track, cars and other ui to the terminal
- * @param player_car pointer to a class Car's object
- * @param game_screen pointer to game screen properties
- * @param game_state
- * @param race_track
- * @param gameplay_settings
+ * Render the track, player car, telemetry, and gameplay guidance.
+ * @param player_car player vehicle to draw and update
+ * @param game_screen current terminal dimensions
+ * @param race_track track geometry updated for the current width
+ * @param game_state current game tick and elapsed time
+ * @param gameplay_settings resource-degradation values
+ * @return terminal escape sequences and gameplay content
  */
 std::string render::render_game(Cars* player_car,
     const Screen game_screen,
@@ -178,7 +181,14 @@ std::string render::render_game(Cars* player_car,
 }
 
 
-
+/**
+ * Render the score screen, including an optional game-over message.
+ * @param high_score best score loaded from persistent storage
+ * @param score score earned in the current race
+ * @param game_screen terminal dimensions used to center the screen
+ * @param game_over_message reason for ending the race, or an empty string
+ * @return terminal escape sequences and score content
+ */
 std::string render::render_score(const int high_score, const int score, const Screen game_screen, const std::string& game_over_message)
 {
     std::stringstream score_buffer;
@@ -218,7 +228,7 @@ std::string render::render_score(const int high_score, const int score, const Sc
 /**
  * Prints car on the racing track
  * @param car pointer to an object of Class car
- * @return
+ * @return terminal escape sequences and car artwork
  */
 std::string render::print_race_car(const Cars* car)
 {
@@ -240,6 +250,15 @@ std::string render::print_race_car(const Cars* car)
 }
 
 
+/**
+ * Render the vehicle-status and race-telemetry panels.
+ * @param screen_row
+ * @param screen_col
+ * @param track_end
+ * @param second
+ * @param player_car
+ * @return terminal escape sequences and telemetry content
+ */
 static std::string print_infotainment_screen(const int screen_row, const int screen_col, const int track_end, const int second, const Cars* player_car)
 {
     std::stringstream screen_buffer;
@@ -335,6 +354,12 @@ static std::string print_infotainment_screen(const int screen_row, const int scr
 }
 
 
+/**
+ * Convert a resource capacity into a ten-cell text meter.
+ * @param current_capacity
+ * @param max_capacity
+ * @return a bracketed meter using filled and empty block glyphs
+ */
 static std::string print_meter(const int current_capacity, const int max_capacity)
 {
     std::stringstream meter_buffer;

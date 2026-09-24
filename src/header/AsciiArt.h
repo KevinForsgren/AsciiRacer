@@ -158,6 +158,10 @@ static std::vector<Car_Design> car_designs = {
 class AsciiArt
 {
 public:
+    /**
+     * Build the seven-row car sprite with independent body, bumper, and tyre colors.
+     * @return colored rows suitable for terminal rendering
+     */
     static std::vector<std::string> change_car_color(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color)
     {
         std::vector<std::string> car_model(7);

@@ -78,6 +78,12 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position)
 
 }
 
+/**
+ * Reset position and all gameplay resources in a specific lane.
+ * @param game_Screen terminal dimensions
+ * @param car_y_position vertical spawn position
+ * @param lane_index lane index in the range 0 through 2
+ */
 void Cars::reset_car(const Screen game_Screen, const int car_y_position, const int lane_index)
 {
 
@@ -103,6 +109,13 @@ void Cars::reset_car(const Screen game_Screen, const int car_y_position, const i
 }
 
 
+/**
+ * Construct an enemy car and assign its traffic-management identifier.
+ * @param base_color body color sequence
+ * @param bumper_color bumper color sequence
+ * @param tyre_color tyre color sequence
+ * @param id enemy identifier
+ */
 EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_color, const std::string& tyre_color, const int id) :
     Cars(base_color, bumper_color, tyre_color)
 {
@@ -110,6 +123,12 @@ EnemyCars::EnemyCars(const std::string& base_color, const std::string& bumper_co
 }
 
 
+/**
+ * Check axis-aligned overlap between this enemy and the player.
+ * @param player_x player's left coordinate
+ * @param player_y player's top coordinate
+ * @return true when the car bounds overlap; otherwise false
+ */
 bool EnemyCars::collision(const int player_x, const int player_y) const
 {
     // Player is either on the Right || Left
@@ -129,11 +148,17 @@ bool EnemyCars::collision(const int player_x, const int player_y) const
     return true;
 }
 
+
+/**
+ * Rebuild the enemy sprite with the supplied colors.
+ * @param base_color body color sequence
+ * @param bumper_color bumper color sequence
+ * @param tyre_color tyre color sequence
+ */
 void EnemyCars::update_car_model(const std::string& base_color, const std::string& bumper_color,
-    const std::string& tyre_color)
+                                 const std::string& tyre_color)
 {
     this->Model = AsciiArt::change_car_color(base_color, bumper_color, tyre_color);
 }
-
 
 
