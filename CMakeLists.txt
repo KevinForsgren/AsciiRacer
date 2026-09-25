@@ -3,6 +3,8 @@ project(AsciiRacer)
 
 set(CMAKE_CXX_STANDARD 23)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 add_executable(AsciiRacer src/main.cpp
         src/terminal.cpp
         src/header/terminal.h
