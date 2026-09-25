@@ -10,6 +10,8 @@ class TerminalControl
     public:
         /** Clear the visible terminal contents. */
         static std::string clear_terminal(Screen game_screen);
+        /** Freeze/Unfreeze terminal based on input. */
+        static std::string toggle_terminal_freeze(bool freeze);
         /** Store the current terminal row and column counts. */
         static void get_terminal_size(int* row, int* col);
         /** Hide the terminal cursor using an ANSI control sequence. */

@@ -118,9 +118,6 @@ int main()
         // Uncomment for getting terminal size every iteration
         TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
-        // Creating a clean terminal
-        //TC::clear_terminal(game_screen);
-
 
         if (current_screen_mode == MainMenu)
         {
@@ -198,21 +195,9 @@ int main()
         {
             std::stringstream frameBuffer;
 
-            char gameplay_inpT;
-            if (TC::read_input(&gameplay_inpT))
-            {
-                switch (gameplay_inpT)
-                {
-                case 'a':
-                    player_car.move_left(gameplay_settings.Steps);
-                    break;
-                case 'd':
-                    player_car.move_right(gameplay_settings.Steps);
-                    break;
-                default: break;
-                }
-            }
-
+            // Freezing terminal and clearing past output
+            frameBuffer << TC::toggle_terminal_freeze(true) << TC::clear_terminal(game_screen);
+           
             // Printing and Managing track ground
             if (game_state.GameTick % 3 == 0)
             {
@@ -365,12 +350,29 @@ int main()
                 manage_traffic(enemies, game_screen, traffic_setting.Seed, &traffic_setting.CurrentTrafficCar, &traffic_setting.CurrentTrafficDistributionRow);
             }
 
+            // Updating player car position after user input
+            char gameplay_inpT;
+            if (TC::read_input(&gameplay_inpT))
+            {
+                switch (gameplay_inpT)
+                {
+                case 'a':
+                    player_car.move_left(gameplay_settings.Steps);
+                    break;
+                case 'd':
+                    player_car.move_right(gameplay_settings.Steps);
+                    break;
+                default: break;
+                }
+            }
+
             // Updating player highScore
             if (player_car.Score > player_car.HighScore)
             {
                 player_car.HighScore = player_car.Score;
             }
 
+            frameBuffer << TC::toggle_terminal_freeze(false);
             std::cout << frameBuffer.str() << std::flush;
             game_state.GameTick++;
 

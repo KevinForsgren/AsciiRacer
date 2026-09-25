@@ -141,10 +141,16 @@ std::string render::render_game(Cars* player_car,
 
 
     // Printing player guides
-    const std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
+    std::string guide_message_left = "Press [A] for moving Left   Press [D] for moving Right";
     const std::string guide_message_right = "Avoid Grass and Collect fuel/tyre";
 
-    frame_buffer << TC::move_cursor(game_screen.Row - 1, ( game_screen.Col - (game_screen.Col - race_track->TrackStart) - static_cast<int>(guide_message_left.length())) / 2 ) << guide_message_left;
+    if (race_track->TrackStart < static_cast<int>(guide_message_left.length()) + 2 )
+    {
+        guide_message_left = "Press [A] and [D] for movement";
+    }
+
+    frame_buffer << TC::move_cursor(game_screen.Row - 1, ( race_track->TrackStart - static_cast<int>(guide_message_left.length()) ) / 2) << guide_message_left;
+    //frame_buffer << TC::move_cursor(game_screen.Row - 1, (game_screen.Col - (game_screen.Col - race_track->TrackStart) - static_cast<int>(guide_message_left.length())) / 2) << guide_message_left;
     frame_buffer << TC::move_cursor(game_screen.Row - 1, race_track->TrackEnd + (game_screen.Col - race_track->TrackEnd - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
