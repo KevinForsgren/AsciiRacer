@@ -1,5 +1,7 @@
 #include "header/environment.h"
 
+#include <bits/fs_fwd.h>
+
 #include "header/AsciiArt.h"
 
 /**
@@ -86,12 +88,10 @@ std::string Collector::spawn_collector() const
 
 /**
  * Create the repeating ground-object belt used by the gameplay renderer.
- * @param game_screen terminal dimensions
  * @param environment_objects four environment objects forming one pattern
  */
-GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environment_objects[])
+GroundSystem::GroundSystem (EnvironmentObject environment_objects[])
 {
-    this->screen_height = game_screen.Row;
     int pattern_height = 0;
     constexpr int VerticalSpacing = 3;
 
@@ -113,12 +113,13 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
 
 
     // 4. Initialize the single belt buffer
-    int current_y = -pattern_height; // Start one full pattern above the screen FIXME
+    int current_y = -pattern_height; // Start one full pattern above the screen
 
     for (int p = 0; p < num_blocks; ++p)
     {
         for (int i = 0; i < 4; ++i)
-        { // Sequentially add 1, 2, 3, 4
+        {
+            // Sequentially add 1, 2, 3, 4
             GroundBlock block{};
             block.art = &environment_objects[i].Model;
             block.Height = environment_objects[i].Height;
@@ -131,6 +132,7 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
             current_y += block.Height + VerticalSpacing;
         }
     }
+
 }
 
 
@@ -140,12 +142,13 @@ GroundSystem::GroundSystem (const Screen game_screen, EnvironmentObject environm
  */
 void GroundSystem::update(const int scroll_speed = 1)
 {
+
     for (auto& block : belt)
     {
         block.y += scroll_speed;
 
         // Recycle: if the block moves completely off the bottom
-        if (block.y >= screen_height)
+        if (block.y > screen_height)
         {
             // Teleport to the top exactly as before.
             // This still works perfectly because total_belt_height is the exact sum of all varying heights.
@@ -158,9 +161,10 @@ void GroundSystem::update(const int scroll_speed = 1)
 /**
  * Render visible ground blocks on the left and right sides of the track.
  * @param track current track geometry
+ * @param game_screen terminal dimension
  * @return terminal escape sequences and ground artwork
  */
-std::string GroundSystem::render(const Track& track) const
+std::string GroundSystem::render(const Track& track, const Screen game_screen) const
 {
     std::stringstream screen_buffer;
 
@@ -173,7 +177,7 @@ std::string GroundSystem::render(const Track& track) const
             int screen_y = block.y + row;
 
             // Only draw if within vertical screen bounds
-            if (screen_y >= 0 && screen_y < screen_height)
+            if (screen_y >= 0 && screen_y <= game_screen.Row)
             {
 
                 // Calculate offset to center the object within the ground area

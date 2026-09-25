@@ -78,7 +78,7 @@ int main()
         {.Model = stone_dotted, .Height = 3, .Width = 6},
         {.Model = stone_dash, .Height = 3, .Width = 10}
     };
-    GroundSystem ground_system(game_screen, (environment_objects.data()));
+    GroundSystem ground_system(environment_objects.data());
 
     // Collectors
     Collector fuel{};
@@ -142,7 +142,6 @@ int main()
 
                 if (home_inpT == 'q' || home_inpT == 'Q') break;
             }
-
             std::cout << main_menu_buffer.str() << std::flush;
         }
         else if (current_screen_mode == Pause)
@@ -204,7 +203,7 @@ int main()
                 // Move ground down by 1 unit
                 ground_system.update(1);
             }
-            frameBuffer << ground_system.render(race_track);
+            frameBuffer << ground_system.render(race_track, game_screen);
 
 
             frameBuffer << render::render_game(&player_car, game_screen, &race_track, &game_state, gameplay_settings);

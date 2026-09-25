@@ -236,12 +236,6 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
 bool TerminalControl::read_input(char* c)
 {
 #ifdef _WIN32
-    //HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
-    //DWORD bytesRead;
-    //if (ReadFile(hInput, c, 1, &bytesRead, nullptr) && bytesRead > 0)
-    //{
-    //    return true;
-    //}
 
     HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
     DWORD events = 0;
@@ -268,8 +262,7 @@ bool TerminalControl::read_input(char* c)
             }
         }
 
-        // If it was a mouse movement or a modifier key (like Shift), 
-        // the loop continues and checks the next event.
+        // If it was a mouse movement or a modifier key (like Shift), the loop continues and checks the next event.
         GetNumberOfConsoleInputEvents(hInput, &events);
     }
 #elif defined(__linux__)

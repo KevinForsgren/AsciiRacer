@@ -150,7 +150,7 @@ std::string render::render_game(Cars* player_car,
     }
 
     frame_buffer << TC::move_cursor(game_screen.Row - 1, ( race_track->TrackStart - static_cast<int>(guide_message_left.length()) ) / 2) << guide_message_left;
-    //frame_buffer << TC::move_cursor(game_screen.Row - 1, (game_screen.Col - (game_screen.Col - race_track->TrackStart) - static_cast<int>(guide_message_left.length())) / 2) << guide_message_left;
+
     frame_buffer << TC::move_cursor(game_screen.Row - 1, race_track->TrackEnd + (game_screen.Col - race_track->TrackEnd - static_cast<int>(guide_message_right.length())) / 2 ) << guide_message_right;
 
     //Drawing Infotainment screen
@@ -178,9 +178,7 @@ std::string render::render_game(Cars* player_car,
         }
     }
 
-
     // Increment player score
-    // need to implement reward collecting score increment
     player_car->Score = static_cast<int>(game_state->GameTick * 0.25);
 
     return frame_buffer.str();

@@ -51,16 +51,16 @@ class GroundSystem
 private:
     std::vector<GroundBlock> belt;
 
-    int screen_height;
+    int screen_height = 150;
     int total_belt_height;
 
 public:
     /** Build a scrolling ground belt from four repeating environment objects. */
-    GroundSystem(Screen game_screen, EnvironmentObject environment_objects[]);
+    explicit GroundSystem(EnvironmentObject environment_objects[]);
     /** Move all ground blocks down and recycle blocks beyond the screen. */
     void update(int scroll_speed);
     /** Render visible ground objects on both sides of the track. */
-    [[nodiscard]] std::string render(const Track& track) const;
+    [[nodiscard]] std::string render(const Track& track, Screen game_screen) const;
 
 
 };
