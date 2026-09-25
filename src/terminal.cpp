@@ -97,9 +97,26 @@ void TerminalControl::main_window()
  * clear current content of the terminal
  * @return void
  */
-void TerminalControl::clear_terminal()
+std::string TerminalControl::clear_terminal(Screen game_screen)
 {
-    std::cout << "\033[2J";
+    std::stringstream buffer;
+
+#ifdef _WIN32
+    //std::string blank_row;
+    //blank_row.assign(game_screen.Col, ' ');
+
+    //for (int i = 1; i <= game_screen.Row; i++) 
+    //{
+    //    buffer << move_cursor(i, 1) << blank_row;
+    //}
+
+    buffer << "\033[2J";
+
+#elif defined (__linux__)
+    buffer << "\033[2J";
+#endif
+
+    return buffer.str();
 }
 
 

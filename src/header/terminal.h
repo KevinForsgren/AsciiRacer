@@ -1,6 +1,7 @@
 #ifndef ASCIIRACER_TERMINAL_H
 #define ASCIIRACER_TERMINAL_H
 #include <string>
+#include "gameSettings.h"
 
 
 
@@ -8,7 +9,7 @@ class TerminalControl
 {
     public:
         /** Clear the visible terminal contents. */
-        static void clear_terminal();
+        static std::string clear_terminal(Screen game_screen);
         /** Store the current terminal row and column counts. */
         static void get_terminal_size(int* row, int* col);
         /** Hide the terminal cursor using an ANSI control sequence. */

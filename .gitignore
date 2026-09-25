@@ -1,0 +1,16 @@
+#Visual Studio
+.vs/
+
+# environmental variables
+*/.env
+
+#Build Directories
+build/
+out/
+out/build
+
+#Debug/Release output
+Debug/
+Release/
+x64/
+x86/

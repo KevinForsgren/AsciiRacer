@@ -119,13 +119,17 @@ int main()
         TC::get_terminal_size(&game_screen.Row, &game_screen.Col);
 
         // Creating a clean terminal
-        TC::clear_terminal();
+        //TC::clear_terminal(game_screen);
 
 
         if (current_screen_mode == MainMenu)
         {
             // Managing Game's main menu
-            std::cout << render::render_main_menu(game_screen.Row, game_screen.Col) << std::flush;
+            std::stringstream main_menu_buffer;
+
+            main_menu_buffer << TC::clear_terminal(game_screen);
+
+            main_menu_buffer << render::render_main_menu(game_screen.Row, game_screen.Col);
             
             char home_inpT;
             if (TC::read_input(&home_inpT))
@@ -140,10 +144,13 @@ int main()
                 }
 
                 if (home_inpT == 'q' || home_inpT == 'Q') break;
-            }      
+            }
+
+            std::cout << main_menu_buffer.str() << std::flush;
         }
         else if (current_screen_mode == Pause)
         {
+            std::stringstream pause_buffer;
 
             // Reset Game State and Player Car for every new gameplay
             player_car.reset_car(game_screen, game_screen.Row - player_car.Height - 1);
@@ -153,7 +160,8 @@ int main()
             traffic_setting.CurrentTrafficDistributionRow = 0;
             traffic_setting.Seed = TC::random_int(0, 4);
             
-            std::cout << render::render_pause_menu(game_screen) << std::flush;
+            pause_buffer << TC::clear_terminal(game_screen);
+            pause_buffer << render::render_pause_menu(game_screen);
 
             char pause_inpT;
             if (TC::read_input(&pause_inpT))
@@ -183,6 +191,8 @@ int main()
                     current_screen_mode = Gameplay;
                 }
             }
+
+            std::cout << pause_buffer.str() << std::flush;
         }
         else if (current_screen_mode == Gameplay)
         {
@@ -315,12 +325,6 @@ int main()
             {
                 PlayerScore = player_car.Score;
                 
-                if (player_car.Score > player_car.HighScore)
-                {
-                    player_car.HighScore = player_car.Score;
-                }
-
-
                 for (const auto& enemy: enemies)
                 {
                     enemy->isActive = false;
@@ -337,7 +341,7 @@ int main()
             }
 
             // Increasing Game Speed over time
-            if (game_state.GameTime >= 100)
+            if (game_state.GameTime >= 90)
             {
                 game_state.GameSpeed = 4;
             }
@@ -361,6 +365,12 @@ int main()
                 manage_traffic(enemies, game_screen, traffic_setting.Seed, &traffic_setting.CurrentTrafficCar, &traffic_setting.CurrentTrafficDistributionRow);
             }
 
+            // Updating player highScore
+            if (player_car.Score > player_car.HighScore)
+            {
+                player_car.HighScore = player_car.Score;
+            }
+
             std::cout << frameBuffer.str() << std::flush;
             game_state.GameTick++;
 
@@ -368,7 +378,10 @@ int main()
         else if (current_screen_mode == ScoreBoard)
         {
             // Manage ScoreBoard here
-            std::cout << render::render_score(player_car.HighScore, PlayerScore, game_screen, Message) << std::flush;
+            std::stringstream score_board_buffer;
+
+            score_board_buffer << TC::clear_terminal(game_screen);
+            score_board_buffer << render::render_score(player_car.HighScore, PlayerScore, game_screen, Message);
             
             char score_inpT;
 
@@ -379,7 +392,9 @@ int main()
                     current_screen_mode = MainMenu;
                     Message.clear();
                 }
-            }            
+            }
+
+            std::cout << score_board_buffer.str() << std::flush;
         }
 
 
