@@ -179,9 +179,7 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
     HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 
     // Only fetch original attributes if haven't stored them yet
-    if (originalInputMode == 0 && !GetConsoleMode(hStdin, &originalInputMode)) {
-        return false;
-    }
+    if (!GetConsoleMode(hStdin, &originalInputMode)) return false;
 
 #elif defined (__linux__)
     static termios oldT, newT;
@@ -195,8 +193,6 @@ bool TerminalControl::switch_raw_mode(const bool toggle)
         rawInputMode &= ~ENABLE_LINE_INPUT;
         rawInputMode &= ~ENABLE_ECHO_INPUT;
         rawInputMode &= ~ENABLE_PROCESSED_INPUT;
-
-
 
         if (!SetConsoleMode(hStdin, rawInputMode)) return false;
 
@@ -275,3 +271,34 @@ bool TerminalControl::read_input(char* c)
 #endif
     return false;
 }
+
+
+/**
+* Toggle virtual terminal processing inside windows machine
+* @param toogle switch between modes
+* @return bool
+*/
+#ifdef _WIN32
+bool TerminalControl::setup_windows_terminal(bool toogle)
+{
+    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD originalOutputMode = 0;
+
+    if (!GetConsoleMode(hStdOut, &originalOutputMode)) return false;
+
+    if (toogle)
+    {
+        DWORD virtualMode = originalOutputMode;
+
+        virtualMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+        if(!SetConsoleMode(hStdOut, virtualMode)) return false;
+        
+        return true;
+    }
+
+    if (!SetConsoleMode(hStdOut, originalOutputMode)) return false;
+
+    return true;
+}
+#endif

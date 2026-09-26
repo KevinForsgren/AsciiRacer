@@ -34,6 +34,8 @@ class TerminalControl
         static std::string tc_background(int, int, int);
         /** Return a random integer in the inclusive range [min, max]. */
         static int random_int(int min, int max);
+        /** Toggle virtual terminal processing inside windows machine. */
+        static bool setup_windows_terminal(bool toogle);
 };
 
 

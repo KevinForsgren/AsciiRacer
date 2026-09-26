@@ -8,6 +8,7 @@
 build/
 out/
 out/build
+build\Debug
 
 #Debug/Release output
 Debug/

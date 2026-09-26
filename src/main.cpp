@@ -43,6 +43,7 @@ const std::string FilePath = "./data.dat";
 int main()
 {
  #ifdef _WIN32
+    if (!TC::setup_windows_terminal(true)) return false;
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 #endif
@@ -413,6 +414,9 @@ int main()
     TC::switch_raw_mode(false);
     TC::main_window();
     TC::show_cursor();
+#ifdef _WIN32
+    TC::setup_windows_terminal(false);
+#endif
 
     return 0;
 }

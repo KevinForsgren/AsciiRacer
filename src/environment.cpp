@@ -1,7 +1,4 @@
 #include "header/environment.h"
-
-#include <bits/fs_fwd.h>
-
 #include "header/AsciiArt.h"
 
 /**
