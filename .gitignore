@@ -5,11 +5,11 @@
 */.env
 
 #Build Directories
-build/
-out/
 cmake-build-debug
 cmake-build-debug-mingw-windows
-out/build
+.idea
+build\
+out\
 build\Debug
 
 #Debug/Release output
@@ -17,3 +17,18 @@ Debug/
 Release/
 x64/
 x86/
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Ignored default folder with query files
+/queries/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+#Others
+*.iml
+*.exe
